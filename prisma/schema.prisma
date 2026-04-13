@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                      String          @id @default(cuid())
+  email                   String          @unique
+  passwordHash            String
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+  profile                 Profile?
+  matchesAsUserA          Match[]         @relation("MatchUserA")
+  matchesAsUserB          Match[]         @relation("MatchUserB")
+  collaborationsRequested Collaboration[] @relation("CollaborationRequester")
+  collaborationsReceived  Collaboration[] @relation("CollaborationReceiver")
+}
+
+model Profile {
+  id          String       @id @default(cuid())
+  userId      String       @unique
+  displayName String
+  city        String?
+  experience  Int?
+  preferences String?
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instruments Instrument[]
+  styles      Style[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model Instrument {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  profiles Profile[]
+}
+
+model Style {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  profiles Profile[]
+}
+
+model Match {
+  id             String          @id @default(cuid())
+  userAId        String
+  userBId        String
+  score          Float
+  status         MatchStatus     @default(PENDING)
+  createdAt      DateTime        @default(now())
+  userA          User            @relation("MatchUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB          User            @relation("MatchUserB", fields: [userBId], references: [id], onDelete: Cascade)
+  collaborations Collaboration[]
+
+  @@unique([userAId, userBId])
+}
+
+model Collaboration {
+  id          String              @id @default(cuid())
+  requesterId String
+  receiverId  String
+  matchId     String?
+  status      CollaborationStatus @default(PENDING)
+  createdAt   DateTime            @default(now())
+  requester   User                @relation("CollaborationRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiver    User                @relation("CollaborationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  match       Match?              @relation(fields: [matchId], references: [id], onDelete: SetNull)
+}
+
+enum MatchStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum CollaborationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
