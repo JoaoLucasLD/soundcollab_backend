@@ -8,10 +8,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProfilesModule = void 0;
 const common_1 = require("@nestjs/common");
+const auth_module_1 = require("../auth/auth.module");
+const profiles_controller_1 = require("./profiles.controller");
+const profiles_repository_1 = require("./profiles.repository");
+const profiles_service_1 = require("./profiles.service");
 let ProfilesModule = class ProfilesModule {
 };
 exports.ProfilesModule = ProfilesModule;
 exports.ProfilesModule = ProfilesModule = __decorate([
-    (0, common_1.Module)({})
+    (0, common_1.Module)({
+        imports: [auth_module_1.AuthModule],
+        controllers: [profiles_controller_1.ProfilesController],
+        providers: [profiles_service_1.ProfilesService, profiles_repository_1.ProfilesRepository],
+    })
 ], ProfilesModule);
 //# sourceMappingURL=profiles.module.js.map
