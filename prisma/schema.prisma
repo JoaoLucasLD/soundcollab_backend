@@ -21,6 +21,7 @@ model User {
   matchesAsUserB          Match[]         @relation("MatchUserB")
   collaborationsRequested Collaboration[] @relation("CollaborationRequester")
   collaborationsReceived  Collaboration[] @relation("CollaborationReceiver")
+  chatMessagesSent        ChatMessage[]
 }
 
 model Profile {
@@ -64,15 +65,37 @@ model Match {
 }
 
 model Collaboration {
-  id          String              @id @default(cuid())
-  requesterId String
-  receiverId  String
-  matchId     String?
-  status      CollaborationStatus @default(PENDING)
-  createdAt   DateTime            @default(now())
-  requester   User                @relation("CollaborationRequester", fields: [requesterId], references: [id], onDelete: Cascade)
-  receiver    User                @relation("CollaborationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
-  match       Match?              @relation(fields: [matchId], references: [id], onDelete: SetNull)
+  id           String              @id @default(cuid())
+  requesterId  String
+  receiverId   String
+  matchId      String?
+  status       CollaborationStatus @default(PENDING)
+  createdAt    DateTime            @default(now())
+  requester    User                @relation("CollaborationRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  receiver     User                @relation("CollaborationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  match        Match?              @relation(fields: [matchId], references: [id], onDelete: SetNull)
+  conversation ChatConversation?
+}
+
+model ChatConversation {
+  id              String        @id @default(cuid())
+  collaborationId String        @unique
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  collaboration   Collaboration @relation(fields: [collaborationId], references: [id], onDelete: Cascade)
+  messages        ChatMessage[]
+}
+
+model ChatMessage {
+  id             String           @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String
+  createdAt      DateTime         @default(now())
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User             @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
 }
 
 enum MatchStatus {
