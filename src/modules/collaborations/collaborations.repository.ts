@@ -1,10 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { Collaboration, CollaborationStatus, Profile } from '@prisma/client';
+import {
+  Collaboration,
+  CollaborationStatus,
+  Prisma,
+  Profile,
+} from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 
 type CreateCollaborationParams = {
   requesterId: string;
   receiverId: string;
+};
+
+type ListCollaborationsFilters = {
+  userId: string;
+  skip: number;
+  take: number;
+  status?: CollaborationStatus;
+};
+
+type ListCollaborationsResult = {
+  items: Collaboration[];
+  total: number;
 };
 
 @Injectable()
@@ -61,5 +78,36 @@ export class CollaborationsRepository {
       where: { id: collaborationId },
       data: { status },
     });
+  }
+
+  async findByUserWithFilters(
+    filters: ListCollaborationsFilters,
+  ): Promise<ListCollaborationsResult> {
+    const where: Prisma.CollaborationWhereInput = {
+      OR: [{ requesterId: filters.userId }, { receiverId: filters.userId }],
+    };
+
+    if (filters.status) {
+      where.status = filters.status;
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.collaboration.findMany({
+        where,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip: filters.skip,
+        take: filters.take,
+      }),
+      this.prisma.collaboration.count({
+        where,
+      }),
+    ]);
+
+    return {
+      items,
+      total,
+    };
   }
 }

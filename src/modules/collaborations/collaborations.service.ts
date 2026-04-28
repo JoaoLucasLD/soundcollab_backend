@@ -9,6 +9,8 @@ import { Collaboration, CollaborationStatus } from '@prisma/client';
 import { CollaborationsRepository } from './collaborations.repository';
 import { CollaborationResponseDto } from './dto/collaboration-response.dto';
 import { CreateCollaborationDto } from './dto/create-collaboration.dto';
+import { ListCollaborationsQueryDto } from './dto/list-collaborations-query.dto';
+import { ListCollaborationsResponseDto } from './dto/list-collaborations-response.dto';
 
 @Injectable()
 export class CollaborationsService {
@@ -66,6 +68,33 @@ export class CollaborationsService {
       collaborationId,
       CollaborationStatus.REJECTED,
     );
+  }
+
+  async listForUser(
+    userId: string,
+    query: ListCollaborationsQueryDto,
+  ): Promise<ListCollaborationsResponseDto> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    const { items, total } =
+      await this.collaborationsRepository.findByUserWithFilters({
+        userId,
+        skip,
+        take: limit,
+        status: query.status,
+      });
+
+    return {
+      items: items.map((item) => this.toResponse(item)),
+      meta: {
+        page,
+        limit,
+        total,
+        totalPages: total === 0 ? 0 : Math.ceil(total / limit),
+      },
+    };
   }
 
   private async updateStatus(
