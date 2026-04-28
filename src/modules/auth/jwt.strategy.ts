@@ -19,8 +19,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         'JWT_SECRET',
         'dev-secret-change-me',
       ),
-      issuer: configService.get<string>('JWT_ISSUER', 'musiclounge'),
-      audience: configService.get<string>('JWT_AUDIENCE', 'musiclounge-web'),
+      issuer: configService.get<string>('JWT_ISSUER', 'soundcollab'),
+      audience: configService.get<string>('JWT_AUDIENCE', 'soundcollab-web'),
     });
   }
 

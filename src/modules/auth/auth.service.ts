@@ -36,10 +36,10 @@ export class AuthService {
       'JWT_SECRET',
       'dev-secret-change-me',
     );
-    this.jwtIssuer = this.configService.get<string>('JWT_ISSUER', 'musiclounge');
+    this.jwtIssuer = this.configService.get<string>('JWT_ISSUER', 'soundcollab');
     this.jwtAudience = this.configService.get<string>(
       'JWT_AUDIENCE',
-      'musiclounge-web',
+      'soundcollab-web',
     );
     this.jwtExpiresInSeconds = Number(
       this.configService.get<string>('JWT_EXPIRES_IN_SECONDS', '900'),
