@@ -9,35 +9,42 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UpdateMyProfileDto = void 0;
+exports.ExploreMusiciansQueryDto = void 0;
+const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
-class UpdateMyProfileDto {
+class ExploreMusiciansQueryDto {
 }
-exports.UpdateMyProfileDto = UpdateMyProfileDto;
+exports.ExploreMusiciansQueryDto = ExploreMusiciansQueryDto;
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MinLength)(2),
-    (0, class_validator_1.MaxLength)(80),
+    (0, class_validator_1.MaxLength)(60),
     __metadata("design:type", String)
-], UpdateMyProfileDto.prototype, "displayName", void 0);
+], ExploreMusiciansQueryDto.prototype, "instrument", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(60),
+    __metadata("design:type", String)
+], ExploreMusiciansQueryDto.prototype, "style", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MaxLength)(120),
     __metadata("design:type", String)
-], UpdateMyProfileDto.prototype, "city", void 0);
+], ExploreMusiciansQueryDto.prototype, "city", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
-    (0, class_validator_1.Max)(100),
     __metadata("design:type", Number)
-], UpdateMyProfileDto.prototype, "experience", void 0);
+], ExploreMusiciansQueryDto.prototype, "experienceMin", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.MaxLength)(500),
-    __metadata("design:type", String)
-], UpdateMyProfileDto.prototype, "preferences", void 0);
-//# sourceMappingURL=update-my-profile.dto.js.map
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], ExploreMusiciansQueryDto.prototype, "experienceMax", void 0);
+//# sourceMappingURL=explore-musicians-query.dto.js.map
