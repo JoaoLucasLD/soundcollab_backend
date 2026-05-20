@@ -1,10 +1,11 @@
-import { Instrument, Profile, Style } from '@prisma/client';
+import { Gender, Instrument, Profile, Style } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 export type ExploreFilters = {
     excludeUserId: string;
     instrument?: string;
     style?: string;
     city?: string;
+    gender?: Gender;
     experienceMin?: number;
     experienceMax?: number;
 };

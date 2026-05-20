@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProfilesController = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const remove_profile_instruments_dto_1 = require("./dto/remove-profile-instruments.dto");
+const remove_profile_styles_dto_1 = require("./dto/remove-profile-styles.dto");
 const update_my_profile_dto_1 = require("./dto/update-my-profile.dto");
 const update_profile_instruments_dto_1 = require("./dto/update-profile-instruments.dto");
 const update_profile_styles_dto_1 = require("./dto/update-profile-styles.dto");
@@ -23,17 +25,49 @@ let ProfilesController = class ProfilesController {
     constructor(profilesService) {
         this.profilesService = profilesService;
     }
+    getByUserId(userId) {
+        return this.profilesService.getByUserId(userId);
+    }
+    getById(profileId) {
+        return this.profilesService.getById(profileId);
+    }
     updateMyProfile(req, body) {
         return this.profilesService.upsertMyProfile(req.user.userId, body);
     }
     addMyInstruments(req, body) {
         return this.profilesService.addMyInstruments(req.user.userId, body);
     }
+    replaceMyInstruments(req, body) {
+        return this.profilesService.replaceMyInstruments(req.user.userId, body);
+    }
+    removeMyInstruments(req, body) {
+        return this.profilesService.removeMyInstruments(req.user.userId, body);
+    }
     addMyStyles(req, body) {
         return this.profilesService.addMyStyles(req.user.userId, body);
     }
+    replaceMyStyles(req, body) {
+        return this.profilesService.replaceMyStyles(req.user.userId, body);
+    }
+    removeMyStyles(req, body) {
+        return this.profilesService.removeMyStyles(req.user.userId, body);
+    }
 };
 exports.ProfilesController = ProfilesController;
+__decorate([
+    (0, common_1.Get)('users/:userId'),
+    __param(0, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ProfilesController.prototype, "getByUserId", null);
+__decorate([
+    (0, common_1.Get)(':profileId'),
+    __param(0, (0, common_1.Param)('profileId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ProfilesController.prototype, "getById", null);
 __decorate([
     (0, common_1.Patch)('me'),
     __param(0, (0, common_1.Req)()),
@@ -51,6 +85,22 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ProfilesController.prototype, "addMyInstruments", null);
 __decorate([
+    (0, common_1.Put)('me/instruments'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, update_profile_instruments_dto_1.UpdateProfileInstrumentsDto]),
+    __metadata("design:returntype", Promise)
+], ProfilesController.prototype, "replaceMyInstruments", null);
+__decorate([
+    (0, common_1.Delete)('me/instruments'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, remove_profile_instruments_dto_1.RemoveProfileInstrumentsDto]),
+    __metadata("design:returntype", Promise)
+], ProfilesController.prototype, "removeMyInstruments", null);
+__decorate([
     (0, common_1.Post)('me/styles'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -58,6 +108,22 @@ __decorate([
     __metadata("design:paramtypes", [Object, update_profile_styles_dto_1.UpdateProfileStylesDto]),
     __metadata("design:returntype", Promise)
 ], ProfilesController.prototype, "addMyStyles", null);
+__decorate([
+    (0, common_1.Put)('me/styles'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, update_profile_styles_dto_1.UpdateProfileStylesDto]),
+    __metadata("design:returntype", Promise)
+], ProfilesController.prototype, "replaceMyStyles", null);
+__decorate([
+    (0, common_1.Delete)('me/styles'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, remove_profile_styles_dto_1.RemoveProfileStylesDto]),
+    __metadata("design:returntype", Promise)
+], ProfilesController.prototype, "removeMyStyles", null);
 exports.ProfilesController = ProfilesController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('profiles'),

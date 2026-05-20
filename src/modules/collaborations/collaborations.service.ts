@@ -5,9 +5,15 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Collaboration, CollaborationStatus } from '@prisma/client';
-import { CollaborationsRepository } from './collaborations.repository';
-import { CollaborationResponseDto } from './dto/collaboration-response.dto';
+import { CollaborationStatus, Profile } from '@prisma/client';
+import {
+  CollaborationsRepository,
+  CollaborationWithParticipants,
+} from './collaborations.repository';
+import {
+  CollaborationProfileSummaryDto,
+  CollaborationResponseDto,
+} from './dto/collaboration-response.dto';
 import { CreateCollaborationDto } from './dto/create-collaboration.dto';
 import { ListCollaborationsQueryDto } from './dto/list-collaborations-query.dto';
 import { ListCollaborationsResponseDto } from './dto/list-collaborations-response.dto';
@@ -45,7 +51,7 @@ export class CollaborationsService {
       receiverId,
     });
 
-    return this.toResponse(created);
+    return this.toResponse(created, requesterId);
   }
 
   accept(
@@ -87,7 +93,7 @@ export class CollaborationsService {
       });
 
     return {
-      items: items.map((item) => this.toResponse(item)),
+      items: items.map((item) => this.toResponse(item, userId)),
       meta: {
         page,
         limit,
@@ -122,7 +128,7 @@ export class CollaborationsService {
       collaborationId,
       nextStatus,
     );
-    return this.toResponse(updated);
+    return this.toResponse(updated, receiverId);
   }
 
   private async ensureProfilesExist(
@@ -151,14 +157,42 @@ export class CollaborationsService {
     return normalized;
   }
 
-  private toResponse(model: Collaboration): CollaborationResponseDto {
+  private toResponse(
+    model: CollaborationWithParticipants,
+    currentUserId: string,
+  ): CollaborationResponseDto {
     return {
       id: model.id,
       requesterId: model.requesterId,
       receiverId: model.receiverId,
       matchId: model.matchId,
       status: model.status,
+      direction: model.requesterId === currentUserId ? 'SENT' : 'RECEIVED',
+      requester: this.toProfileSummary(model.requester.profile),
+      receiver: this.toProfileSummary(model.receiver.profile),
       createdAt: model.createdAt,
+    };
+  }
+
+  private toProfileSummary(
+    profile:
+      | (Profile & {
+          instruments: { name: string }[];
+          styles: { name: string }[];
+        })
+      | null,
+  ): CollaborationProfileSummaryDto | null {
+    if (!profile) {
+      return null;
+    }
+
+    return {
+      userId: profile.userId,
+      displayName: profile.displayName,
+      city: profile.city,
+      gender: profile.gender,
+      instruments: profile.instruments.map((item) => item.name),
+      styles: profile.styles.map((item) => item.name),
     };
   }
 }

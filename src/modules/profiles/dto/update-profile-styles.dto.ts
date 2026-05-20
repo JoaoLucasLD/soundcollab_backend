@@ -1,6 +1,5 @@
 import {
   ArrayMaxSize,
-  ArrayMinSize,
   IsArray,
   IsString,
   MaxLength,
@@ -9,10 +8,9 @@ import {
 
 export class UpdateProfileStylesDto {
   @IsArray()
-  @ArrayMinSize(1)
   @ArrayMaxSize(20)
   @IsString({ each: true })
   @MinLength(1, { each: true })
-  @MaxLength(50, { each: true })
-  styles!: string[];
+  @MaxLength(64, { each: true })
+  styleIds!: string[];
 }

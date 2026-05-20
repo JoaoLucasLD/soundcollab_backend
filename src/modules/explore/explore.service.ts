@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { Gender } from '@prisma/client';
 import {
   ExploreMusicianResponseDto,
   ExploreMusiciansResponseDto,
@@ -10,6 +11,7 @@ type NormalizedExploreFilters = {
   instrument?: string;
   style?: string;
   city?: string;
+  gender?: Gender;
   experienceMin?: number;
   experienceMax?: number;
 };
@@ -44,6 +46,7 @@ export class ExploreService {
       userId: profile.userId,
       displayName: profile.displayName,
       city: profile.city,
+      gender: profile.gender,
       experience: profile.experience,
       preferences: profile.preferences,
       instruments: profile.instruments.map((item) => item.name),
@@ -62,11 +65,13 @@ export class ExploreService {
     const instrument = this.normalizeOptionalText(query.instrument)?.toLowerCase();
     const style = this.normalizeOptionalText(query.style)?.toLowerCase();
     const city = this.normalizeOptionalText(query.city);
+    const gender = query.gender;
 
     return {
       instrument,
       style,
       city,
+      gender,
       experienceMin: query.experienceMin,
       experienceMax: query.experienceMax,
     };

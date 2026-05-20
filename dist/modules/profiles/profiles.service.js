@@ -16,8 +16,22 @@ let ProfilesService = class ProfilesService {
     constructor(profilesRepository) {
         this.profilesRepository = profilesRepository;
     }
+    async getByUserId(userId) {
+        const profile = await this.profilesRepository.findByUserId(userId);
+        if (!profile) {
+            throw new common_1.NotFoundException('Profile not found');
+        }
+        return this.toResponse(profile);
+    }
+    async getById(profileId) {
+        const profile = await this.profilesRepository.findById(profileId);
+        if (!profile) {
+            throw new common_1.NotFoundException('Profile not found');
+        }
+        return this.toResponse(profile);
+    }
     async upsertMyProfile(userId, input) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d, _e, _f;
         const existingProfile = await this.profilesRepository.findByUserId(userId);
         const data = this.normalizeProfileUpdate(input);
         if (!existingProfile) {
@@ -28,8 +42,11 @@ let ProfilesService = class ProfilesService {
                 userId,
                 displayName: data.displayName,
                 city: (_a = data.city) !== null && _a !== void 0 ? _a : null,
-                experience: (_b = data.experience) !== null && _b !== void 0 ? _b : null,
-                preferences: (_c = data.preferences) !== null && _c !== void 0 ? _c : null,
+                gender: (_b = data.gender) !== null && _b !== void 0 ? _b : null,
+                experience: (_c = data.experience) !== null && _c !== void 0 ? _c : null,
+                preferences: (_d = data.preferences) !== null && _d !== void 0 ? _d : null,
+                bio: (_e = data.bio) !== null && _e !== void 0 ? _e : null,
+                collaborationGoals: (_f = data.collaborationGoals) !== null && _f !== void 0 ? _f : [],
             });
             return this.toResponse(createdProfile);
         }
@@ -44,8 +61,31 @@ let ProfilesService = class ProfilesService {
         if (!profile) {
             throw new common_1.NotFoundException('Profile not found');
         }
-        const instruments = this.normalizeTermList(input.instruments, 'instrument');
-        const updatedProfile = await this.profilesRepository.addInstruments(profile.id, instruments);
+        const instrumentIds = this.normalizeIdList(input.instrumentIds, 'instrument');
+        await this.ensureInstrumentsExist(instrumentIds);
+        const updatedProfile = await this.profilesRepository.addInstrumentIds(profile.id, instrumentIds);
+        return this.toResponse(updatedProfile);
+    }
+    async replaceMyInstruments(userId, input) {
+        const profile = await this.profilesRepository.findByUserId(userId);
+        if (!profile) {
+            throw new common_1.NotFoundException('Profile not found');
+        }
+        const instrumentIds = this.normalizeIdList(input.instrumentIds, 'instrument', {
+            allowEmpty: true,
+        });
+        await this.ensureInstrumentsExist(instrumentIds);
+        const updatedProfile = await this.profilesRepository.setInstrumentIds(profile.id, instrumentIds);
+        return this.toResponse(updatedProfile);
+    }
+    async removeMyInstruments(userId, input) {
+        const profile = await this.profilesRepository.findByUserId(userId);
+        if (!profile) {
+            throw new common_1.NotFoundException('Profile not found');
+        }
+        const instrumentIds = this.normalizeIdList(input.instrumentIds, 'instrument');
+        await this.ensureInstrumentsExist(instrumentIds);
+        const updatedProfile = await this.profilesRepository.removeInstrumentIds(profile.id, instrumentIds);
         return this.toResponse(updatedProfile);
     }
     async addMyStyles(userId, input) {
@@ -53,8 +93,31 @@ let ProfilesService = class ProfilesService {
         if (!profile) {
             throw new common_1.NotFoundException('Profile not found');
         }
-        const styles = this.normalizeTermList(input.styles, 'style');
-        const updatedProfile = await this.profilesRepository.addStyles(profile.id, styles);
+        const styleIds = this.normalizeIdList(input.styleIds, 'style');
+        await this.ensureStylesExist(styleIds);
+        const updatedProfile = await this.profilesRepository.addStyleIds(profile.id, styleIds);
+        return this.toResponse(updatedProfile);
+    }
+    async replaceMyStyles(userId, input) {
+        const profile = await this.profilesRepository.findByUserId(userId);
+        if (!profile) {
+            throw new common_1.NotFoundException('Profile not found');
+        }
+        const styleIds = this.normalizeIdList(input.styleIds, 'style', {
+            allowEmpty: true,
+        });
+        await this.ensureStylesExist(styleIds);
+        const updatedProfile = await this.profilesRepository.setStyleIds(profile.id, styleIds);
+        return this.toResponse(updatedProfile);
+    }
+    async removeMyStyles(userId, input) {
+        const profile = await this.profilesRepository.findByUserId(userId);
+        if (!profile) {
+            throw new common_1.NotFoundException('Profile not found');
+        }
+        const styleIds = this.normalizeIdList(input.styleIds, 'style');
+        await this.ensureStylesExist(styleIds);
+        const updatedProfile = await this.profilesRepository.removeStyleIds(profile.id, styleIds);
         return this.toResponse(updatedProfile);
     }
     normalizeProfileUpdate(input) {
@@ -65,11 +128,20 @@ let ProfilesService = class ProfilesService {
         if (input.city !== undefined) {
             data.city = this.normalizeNullableText(input.city);
         }
+        if (input.gender !== undefined) {
+            data.gender = input.gender;
+        }
         if (input.experience !== undefined) {
             data.experience = input.experience;
         }
         if (input.preferences !== undefined) {
             data.preferences = this.normalizeNullableText(input.preferences);
+        }
+        if (input.bio !== undefined) {
+            data.bio = this.normalizeNullableText(input.bio);
+        }
+        if (input.collaborationGoals !== undefined) {
+            data.collaborationGoals = [...new Set(input.collaborationGoals)];
         }
         return data;
     }
@@ -84,15 +156,33 @@ let ProfilesService = class ProfilesService {
         }
         return normalized;
     }
-    normalizeTermList(values, label) {
+    normalizeIdList(values, label, options = {}) {
         const normalizedValues = values
-            .map((value) => value.trim().toLowerCase())
+            .map((value) => value.trim())
             .filter((value) => value.length > 0);
         const uniqueValues = [...new Set(normalizedValues)];
-        if (uniqueValues.length === 0) {
-            throw new common_1.BadRequestException(`At least one valid ${label} is required`);
+        if (!options.allowEmpty && uniqueValues.length === 0) {
+            throw new common_1.BadRequestException(`At least one valid ${label} id is required`);
         }
         return uniqueValues;
+    }
+    async ensureInstrumentsExist(instrumentIds) {
+        if (instrumentIds.length === 0) {
+            return;
+        }
+        const instruments = await this.profilesRepository.findInstrumentsByIds(instrumentIds);
+        if (instruments.length !== instrumentIds.length) {
+            throw new common_1.NotFoundException('One or more instruments were not found');
+        }
+    }
+    async ensureStylesExist(styleIds) {
+        if (styleIds.length === 0) {
+            return;
+        }
+        const styles = await this.profilesRepository.findStylesByIds(styleIds);
+        if (styles.length !== styleIds.length) {
+            throw new common_1.NotFoundException('One or more styles were not found');
+        }
     }
     toResponse(profile) {
         return {
@@ -100,8 +190,11 @@ let ProfilesService = class ProfilesService {
             userId: profile.userId,
             displayName: profile.displayName,
             city: profile.city,
+            gender: profile.gender,
             experience: profile.experience,
             preferences: profile.preferences,
+            bio: profile.bio,
+            collaborationGoals: profile.collaborationGoals,
             instruments: profile.instruments.map((item) => item.name),
             styles: profile.styles.map((item) => item.name),
             createdAt: profile.createdAt,

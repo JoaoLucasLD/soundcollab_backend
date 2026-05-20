@@ -1,3 +1,3 @@
 export declare class UpdateProfileStylesDto {
-    styles: string[];
+    styleIds: string[];
 }

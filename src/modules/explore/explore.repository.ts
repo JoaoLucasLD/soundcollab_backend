@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Instrument, Prisma, Profile, Style } from '@prisma/client';
+import { Gender, Instrument, Prisma, Profile, Style } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 
 export type ExploreFilters = {
@@ -7,6 +7,7 @@ export type ExploreFilters = {
   instrument?: string;
   style?: string;
   city?: string;
+  gender?: Gender;
   experienceMin?: number;
   experienceMax?: number;
 };
@@ -48,6 +49,10 @@ export class ExploreRepository {
         equals: filters.city,
         mode: 'insensitive',
       };
+    }
+
+    if (filters.gender) {
+      where.gender = filters.gender;
     }
 
     if (

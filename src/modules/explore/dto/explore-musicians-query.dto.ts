@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { Gender } from '@prisma/client';
+import { IsEnum, IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 
 export class ExploreMusiciansQueryDto {
   @IsOptional()
@@ -16,6 +17,10 @@ export class ExploreMusiciansQueryDto {
   @IsString()
   @MaxLength(120)
   city?: string;
+
+  @IsOptional()
+  @IsEnum(Gender)
+  gender?: Gender;
 
   @IsOptional()
   @Type(() => Number)

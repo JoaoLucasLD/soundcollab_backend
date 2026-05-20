@@ -16,11 +16,10 @@ class UpdateProfileInstrumentsDto {
 exports.UpdateProfileInstrumentsDto = UpdateProfileInstrumentsDto;
 __decorate([
     (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ArrayMinSize)(1),
     (0, class_validator_1.ArrayMaxSize)(20),
     (0, class_validator_1.IsString)({ each: true }),
     (0, class_validator_1.MinLength)(1, { each: true }),
-    (0, class_validator_1.MaxLength)(50, { each: true }),
+    (0, class_validator_1.MaxLength)(64, { each: true }),
     __metadata("design:type", Array)
-], UpdateProfileInstrumentsDto.prototype, "instruments", void 0);
+], UpdateProfileInstrumentsDto.prototype, "instrumentIds", void 0);
 //# sourceMappingURL=update-profile-instruments.dto.js.map

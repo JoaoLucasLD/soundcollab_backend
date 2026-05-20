@@ -32,6 +32,7 @@ let ExploreService = class ExploreService {
             userId: profile.userId,
             displayName: profile.displayName,
             city: profile.city,
+            gender: profile.gender,
             experience: profile.experience,
             preferences: profile.preferences,
             instruments: profile.instruments.map((item) => item.name),
@@ -47,10 +48,12 @@ let ExploreService = class ExploreService {
         const instrument = (_a = this.normalizeOptionalText(query.instrument)) === null || _a === void 0 ? void 0 : _a.toLowerCase();
         const style = (_b = this.normalizeOptionalText(query.style)) === null || _b === void 0 ? void 0 : _b.toLowerCase();
         const city = this.normalizeOptionalText(query.city);
+        const gender = query.gender;
         return {
             instrument,
             style,
             city,
+            gender,
             experienceMin: query.experienceMin,
             experienceMax: query.experienceMax,
         };

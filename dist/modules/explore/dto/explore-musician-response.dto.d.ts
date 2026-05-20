@@ -1,8 +1,10 @@
+import { Gender } from '@prisma/client';
 export declare class ExploreMusicianResponseDto {
     id: string;
     userId: string;
     displayName: string;
     city: string | null;
+    gender: Gender | null;
     experience: number | null;
     preferences: string | null;
     instruments: string[];

@@ -15,8 +15,10 @@ const auth_module_1 = require("./modules/auth/auth.module");
 const chat_module_1 = require("./modules/chat/chat.module");
 const collaborations_module_1 = require("./modules/collaborations/collaborations.module");
 const explore_module_1 = require("./modules/explore/explore.module");
+const instruments_module_1 = require("./modules/instruments/instruments.module");
 const matchmaking_module_1 = require("./modules/matchmaking/matchmaking.module");
 const profiles_module_1 = require("./modules/profiles/profiles.module");
+const styles_module_1 = require("./modules/styles/styles.module");
 const users_module_1 = require("./modules/users/users.module");
 let AppModule = class AppModule {
 };
@@ -29,6 +31,8 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             users_module_1.UsersModule,
             profiles_module_1.ProfilesModule,
+            instruments_module_1.InstrumentsModule,
+            styles_module_1.StylesModule,
             explore_module_1.ExploreModule,
             matchmaking_module_1.MatchmakingModule,
             collaborations_module_1.CollaborationsModule,

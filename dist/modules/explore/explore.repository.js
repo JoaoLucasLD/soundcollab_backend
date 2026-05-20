@@ -42,6 +42,9 @@ let ExploreRepository = class ExploreRepository {
                 mode: 'insensitive',
             };
         }
+        if (filters.gender) {
+            where.gender = filters.gender;
+        }
         if (filters.experienceMin !== undefined ||
             filters.experienceMax !== undefined) {
             const experienceFilter = {};

@@ -40,8 +40,11 @@ let UsersService = class UsersService {
                     id: user.profile.id,
                     displayName: user.profile.displayName,
                     city: user.profile.city,
+                    gender: user.profile.gender,
                     experience: user.profile.experience,
                     preferences: user.profile.preferences,
+                    bio: user.profile.bio,
+                    collaborationGoals: user.profile.collaborationGoals,
                     instruments: user.profile.instruments.map((item) => item.name),
                     styles: user.profile.styles.map((item) => item.name),
                 }

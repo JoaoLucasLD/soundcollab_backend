@@ -3,8 +3,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Instrument, Profile, Style } from '@prisma/client';
+import { CollaborationGoal, Gender, Instrument, Profile, Style } from '@prisma/client';
 import { ProfileResponseDto } from './dto/profile-response.dto';
+import { RemoveProfileInstrumentsDto } from './dto/remove-profile-instruments.dto';
+import { RemoveProfileStylesDto } from './dto/remove-profile-styles.dto';
 import { UpdateMyProfileDto } from './dto/update-my-profile.dto';
 import { UpdateProfileInstrumentsDto } from './dto/update-profile-instruments.dto';
 import { UpdateProfileStylesDto } from './dto/update-profile-styles.dto';
@@ -18,6 +20,24 @@ type ProfileWithRelations = Profile & {
 @Injectable()
 export class ProfilesService {
   constructor(private readonly profilesRepository: ProfilesRepository) {}
+
+  async getByUserId(userId: string): Promise<ProfileResponseDto> {
+    const profile = await this.profilesRepository.findByUserId(userId);
+    if (!profile) {
+      throw new NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
+    }
+
+    return this.toResponse(profile);
+  }
+
+  async getById(profileId: string): Promise<ProfileResponseDto> {
+    const profile = await this.profilesRepository.findById(profileId);
+    if (!profile) {
+      throw new NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
+    }
+
+    return this.toResponse(profile);
+  }
 
   async upsertMyProfile(
     userId: string,
@@ -37,8 +57,11 @@ export class ProfilesService {
         userId,
         displayName: data.displayName,
         city: data.city ?? null,
+        gender: data.gender ?? null,
         experience: data.experience ?? null,
         preferences: data.preferences ?? null,
+        bio: data.bio ?? null,
+        collaborationGoals: data.collaborationGoals ?? [],
       });
       return this.toResponse(createdProfile);
     }
@@ -60,13 +83,57 @@ export class ProfilesService {
   ): Promise<ProfileResponseDto> {
     const profile = await this.profilesRepository.findByUserId(userId);
     if (!profile) {
-      throw new NotFoundException('Profile not found');
+      throw new NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
     }
 
-    const instruments = this.normalizeTermList(input.instruments, 'instrument');
-    const updatedProfile = await this.profilesRepository.addInstruments(
+    const instrumentIds = this.normalizeIdList(input.instrumentIds, 'instrument');
+    await this.ensureInstrumentsExist(instrumentIds);
+
+    const updatedProfile = await this.profilesRepository.addInstrumentIds(
       profile.id,
-      instruments,
+      instrumentIds,
+    );
+
+    return this.toResponse(updatedProfile);
+  }
+
+  async replaceMyInstruments(
+    userId: string,
+    input: UpdateProfileInstrumentsDto,
+  ): Promise<ProfileResponseDto> {
+    const profile = await this.profilesRepository.findByUserId(userId);
+    if (!profile) {
+      throw new NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
+    }
+
+    const instrumentIds = this.normalizeIdList(input.instrumentIds, 'instrument', {
+      allowEmpty: true,
+    });
+    await this.ensureInstrumentsExist(instrumentIds);
+
+    const updatedProfile = await this.profilesRepository.setInstrumentIds(
+      profile.id,
+      instrumentIds,
+    );
+
+    return this.toResponse(updatedProfile);
+  }
+
+  async removeMyInstruments(
+    userId: string,
+    input: RemoveProfileInstrumentsDto,
+  ): Promise<ProfileResponseDto> {
+    const profile = await this.profilesRepository.findByUserId(userId);
+    if (!profile) {
+      throw new NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
+    }
+
+    const instrumentIds = this.normalizeIdList(input.instrumentIds, 'instrument');
+    await this.ensureInstrumentsExist(instrumentIds);
+
+    const updatedProfile = await this.profilesRepository.removeInstrumentIds(
+      profile.id,
+      instrumentIds,
     );
 
     return this.toResponse(updatedProfile);
@@ -78,13 +145,57 @@ export class ProfilesService {
   ): Promise<ProfileResponseDto> {
     const profile = await this.profilesRepository.findByUserId(userId);
     if (!profile) {
-      throw new NotFoundException('Profile not found');
+      throw new NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
     }
 
-    const styles = this.normalizeTermList(input.styles, 'style');
-    const updatedProfile = await this.profilesRepository.addStyles(
+    const styleIds = this.normalizeIdList(input.styleIds, 'style');
+    await this.ensureStylesExist(styleIds);
+
+    const updatedProfile = await this.profilesRepository.addStyleIds(
       profile.id,
-      styles,
+      styleIds,
+    );
+
+    return this.toResponse(updatedProfile);
+  }
+
+  async replaceMyStyles(
+    userId: string,
+    input: UpdateProfileStylesDto,
+  ): Promise<ProfileResponseDto> {
+    const profile = await this.profilesRepository.findByUserId(userId);
+    if (!profile) {
+      throw new NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
+    }
+
+    const styleIds = this.normalizeIdList(input.styleIds, 'style', {
+      allowEmpty: true,
+    });
+    await this.ensureStylesExist(styleIds);
+
+    const updatedProfile = await this.profilesRepository.setStyleIds(
+      profile.id,
+      styleIds,
+    );
+
+    return this.toResponse(updatedProfile);
+  }
+
+  async removeMyStyles(
+    userId: string,
+    input: RemoveProfileStylesDto,
+  ): Promise<ProfileResponseDto> {
+    const profile = await this.profilesRepository.findByUserId(userId);
+    if (!profile) {
+      throw new NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
+    }
+
+    const styleIds = this.normalizeIdList(input.styleIds, 'style');
+    await this.ensureStylesExist(styleIds);
+
+    const updatedProfile = await this.profilesRepository.removeStyleIds(
+      profile.id,
+      styleIds,
     );
 
     return this.toResponse(updatedProfile);
@@ -93,14 +204,20 @@ export class ProfilesService {
   private normalizeProfileUpdate(input: UpdateMyProfileDto): {
     displayName?: string;
     city?: string | null;
+    gender?: Gender | null;
     experience?: number | null;
     preferences?: string | null;
+    bio?: string | null;
+    collaborationGoals?: CollaborationGoal[];
   } {
     const data: {
       displayName?: string;
       city?: string | null;
+      gender?: Gender | null;
       experience?: number | null;
       preferences?: string | null;
+      bio?: string | null;
+      collaborationGoals?: CollaborationGoal[];
     } = {};
 
     if (input.displayName !== undefined) {
@@ -112,11 +229,20 @@ export class ProfilesService {
     if (input.city !== undefined) {
       data.city = this.normalizeNullableText(input.city);
     }
+    if (input.gender !== undefined) {
+      data.gender = input.gender;
+    }
     if (input.experience !== undefined) {
       data.experience = input.experience;
     }
     if (input.preferences !== undefined) {
       data.preferences = this.normalizeNullableText(input.preferences);
+    }
+    if (input.bio !== undefined) {
+      data.bio = this.normalizeNullableText(input.bio);
+    }
+    if (input.collaborationGoals !== undefined) {
+      data.collaborationGoals = [...new Set(input.collaborationGoals)];
     }
 
     return data;
@@ -136,17 +262,44 @@ export class ProfilesService {
     return normalized;
   }
 
-  private normalizeTermList(values: string[], label: string): string[] {
+  private normalizeIdList(
+    values: string[],
+    label: string,
+    options: { allowEmpty?: boolean } = {},
+  ): string[] {
     const normalizedValues = values
-      .map((value) => value.trim().toLowerCase())
+      .map((value) => value.trim())
       .filter((value) => value.length > 0);
 
     const uniqueValues = [...new Set(normalizedValues)];
-    if (uniqueValues.length === 0) {
-      throw new BadRequestException(`At least one valid ${label} is required`);
+    if (!options.allowEmpty && uniqueValues.length === 0) {
+      throw new BadRequestException(`At least one valid ${label} id is required`);
     }
 
     return uniqueValues;
+  }
+
+  private async ensureInstrumentsExist(instrumentIds: string[]): Promise<void> {
+    if (instrumentIds.length === 0) {
+      return;
+    }
+
+    const instruments =
+      await this.profilesRepository.findInstrumentsByIds(instrumentIds);
+    if (instruments.length !== instrumentIds.length) {
+      throw new NotFoundException('One or more instruments were not found');
+    }
+  }
+
+  private async ensureStylesExist(styleIds: string[]): Promise<void> {
+    if (styleIds.length === 0) {
+      return;
+    }
+
+    const styles = await this.profilesRepository.findStylesByIds(styleIds);
+    if (styles.length !== styleIds.length) {
+      throw new NotFoundException('One or more styles were not found');
+    }
   }
 
   private toResponse(profile: ProfileWithRelations): ProfileResponseDto {
@@ -155,8 +308,11 @@ export class ProfilesService {
       userId: profile.userId,
       displayName: profile.displayName,
       city: profile.city,
+      gender: profile.gender,
       experience: profile.experience,
       preferences: profile.preferences,
+      bio: profile.bio,
+      collaborationGoals: profile.collaborationGoals,
       instruments: profile.instruments.map((item) => item.name),
       styles: profile.styles.map((item) => item.name),
       createdAt: profile.createdAt,

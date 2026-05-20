@@ -25,23 +25,34 @@ model User {
 }
 
 model Profile {
+  id                 String              @id @default(cuid())
+  userId             String              @unique
+  displayName        String
+  city               String?
+  gender             Gender?
+  experience         Int?
+  preferences        String?
+  bio                String?
+  collaborationGoals CollaborationGoal[] @default([])
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instruments        Instrument[]
+  styles             Style[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model InstrumentCategory {
   id          String       @id @default(cuid())
-  userId      String       @unique
-  displayName String
-  city        String?
-  experience  Int?
-  preferences String?
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String       @unique
   instruments Instrument[]
-  styles      Style[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
 }
 
 model Instrument {
-  id       String    @id @default(cuid())
-  name     String    @unique
-  profiles Profile[]
+  id         String             @id @default(cuid())
+  name       String             @unique
+  categoryId String
+  category   InstrumentCategory @relation(fields: [categoryId], references: [id])
+  profiles   Profile[]
 }
 
 model Style {
@@ -108,4 +119,21 @@ enum CollaborationStatus {
   PENDING
   ACCEPTED
   REJECTED
+}
+
+enum CollaborationGoal {
+  BAND
+  RECORDING
+  LIVE_SHOWS
+  COMPOSITION
+  PRODUCTION
+  STUDY
+  CASUAL_JAM
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
 }

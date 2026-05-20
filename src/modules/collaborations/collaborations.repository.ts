@@ -2,8 +2,11 @@ import { Injectable } from '@nestjs/common';
 import {
   Collaboration,
   CollaborationStatus,
+  Instrument,
   Prisma,
   Profile,
+  Style,
+  User,
 } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 
@@ -20,8 +23,27 @@ type ListCollaborationsFilters = {
 };
 
 type ListCollaborationsResult = {
-  items: Collaboration[];
+  items: CollaborationWithParticipants[];
   total: number;
+};
+
+export type CollaborationWithParticipants = Collaboration & {
+  requester: User & {
+    profile:
+      | (Profile & {
+          instruments: Instrument[];
+          styles: Style[];
+        })
+      | null;
+  };
+  receiver: User & {
+    profile:
+      | (Profile & {
+          instruments: Instrument[];
+          styles: Style[];
+        })
+      | null;
+  };
 };
 
 @Injectable()
@@ -55,28 +77,33 @@ export class CollaborationsRepository {
     });
   }
 
-  create(params: CreateCollaborationParams): Promise<Collaboration> {
+  create(params: CreateCollaborationParams): Promise<CollaborationWithParticipants> {
     return this.prisma.collaboration.create({
       data: {
         requesterId: params.requesterId,
         receiverId: params.receiverId,
       },
+      include: collaborationParticipantsInclude,
     });
   }
 
-  findById(collaborationId: string): Promise<Collaboration | null> {
+  findById(
+    collaborationId: string,
+  ): Promise<CollaborationWithParticipants | null> {
     return this.prisma.collaboration.findUnique({
       where: { id: collaborationId },
+      include: collaborationParticipantsInclude,
     });
   }
 
   updateStatus(
     collaborationId: string,
     status: CollaborationStatus,
-  ): Promise<Collaboration> {
+  ): Promise<CollaborationWithParticipants> {
     return this.prisma.collaboration.update({
       where: { id: collaborationId },
       data: { status },
+      include: collaborationParticipantsInclude,
     });
   }
 
@@ -94,6 +121,7 @@ export class CollaborationsRepository {
     const [items, total] = await Promise.all([
       this.prisma.collaboration.findMany({
         where,
+        include: collaborationParticipantsInclude,
         orderBy: {
           createdAt: 'desc',
         },
@@ -111,3 +139,26 @@ export class CollaborationsRepository {
     };
   }
 }
+
+const collaborationParticipantsInclude = {
+  requester: {
+    include: {
+      profile: {
+        include: {
+          instruments: true,
+          styles: true,
+        },
+      },
+    },
+  },
+  receiver: {
+    include: {
+      profile: {
+        include: {
+          instruments: true,
+          styles: true,
+        },
+      },
+    },
+  },
+} satisfies Prisma.CollaborationInclude;

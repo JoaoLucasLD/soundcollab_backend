@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateMyProfileDto = void 0;
 const class_validator_1 = require("class-validator");
+const client_1 = require("@prisma/client");
 class UpdateMyProfileDto {
 }
 exports.UpdateMyProfileDto = UpdateMyProfileDto;
@@ -29,6 +30,11 @@ __decorate([
 ], UpdateMyProfileDto.prototype, "city", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.Gender),
+    __metadata("design:type", String)
+], UpdateMyProfileDto.prototype, "gender", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
     (0, class_validator_1.Max)(100),
@@ -40,4 +46,16 @@ __decorate([
     (0, class_validator_1.MaxLength)(500),
     __metadata("design:type", String)
 ], UpdateMyProfileDto.prototype, "preferences", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(500),
+    __metadata("design:type", String)
+], UpdateMyProfileDto.prototype, "bio", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsEnum)(client_1.CollaborationGoal, { each: true }),
+    __metadata("design:type", Array)
+], UpdateMyProfileDto.prototype, "collaborationGoals", void 0);
 //# sourceMappingURL=update-my-profile.dto.js.map

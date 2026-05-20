@@ -21,8 +21,8 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
             secretOrKey: configService.get('JWT_SECRET', 'dev-secret-change-me'),
-            issuer: configService.get('JWT_ISSUER', 'musiclounge'),
-            audience: configService.get('JWT_AUDIENCE', 'musiclounge-web'),
+            issuer: configService.get('JWT_ISSUER', 'soundcollab'),
+            audience: configService.get('JWT_AUDIENCE', 'soundcollab-web'),
         });
         this.authRepository = authRepository;
         this.configService = configService;

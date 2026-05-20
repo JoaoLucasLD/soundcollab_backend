@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExploreMusiciansQueryDto = void 0;
 const class_transformer_1 = require("class-transformer");
+const client_1 = require("@prisma/client");
 const class_validator_1 = require("class-validator");
 class ExploreMusiciansQueryDto {
 }
@@ -33,6 +34,11 @@ __decorate([
     (0, class_validator_1.MaxLength)(120),
     __metadata("design:type", String)
 ], ExploreMusiciansQueryDto.prototype, "city", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.Gender),
+    __metadata("design:type", String)
+], ExploreMusiciansQueryDto.prototype, "gender", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),

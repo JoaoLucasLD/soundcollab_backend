@@ -25,14 +25,26 @@ let ProfilesRepository = class ProfilesRepository {
             },
         });
     }
+    findById(profileId) {
+        return this.prisma.profile.findUnique({
+            where: { id: profileId },
+            include: {
+                instruments: true,
+                styles: true,
+            },
+        });
+    }
     create(params) {
         return this.prisma.profile.create({
             data: {
                 userId: params.userId,
                 displayName: params.displayName,
                 city: params.city,
+                gender: params.gender,
                 experience: params.experience,
                 preferences: params.preferences,
+                bio: params.bio,
+                collaborationGoals: params.collaborationGoals,
             },
             include: {
                 instruments: true,
@@ -50,15 +62,30 @@ let ProfilesRepository = class ProfilesRepository {
             },
         });
     }
-    addInstruments(profileId, instruments) {
+    findInstrumentsByIds(instrumentIds) {
+        return this.prisma.instrument.findMany({
+            where: {
+                id: {
+                    in: instrumentIds,
+                },
+            },
+        });
+    }
+    findStylesByIds(styleIds) {
+        return this.prisma.style.findMany({
+            where: {
+                id: {
+                    in: styleIds,
+                },
+            },
+        });
+    }
+    addInstrumentIds(profileId, instrumentIds) {
         return this.prisma.profile.update({
             where: { id: profileId },
             data: {
                 instruments: {
-                    connectOrCreate: instruments.map((name) => ({
-                        where: { name },
-                        create: { name },
-                    })),
+                    connect: instrumentIds.map((id) => ({ id })),
                 },
             },
             include: {
@@ -67,15 +94,68 @@ let ProfilesRepository = class ProfilesRepository {
             },
         });
     }
-    addStyles(profileId, styles) {
+    setInstrumentIds(profileId, instrumentIds) {
+        return this.prisma.profile.update({
+            where: { id: profileId },
+            data: {
+                instruments: {
+                    set: instrumentIds.map((id) => ({ id })),
+                },
+            },
+            include: {
+                instruments: true,
+                styles: true,
+            },
+        });
+    }
+    removeInstrumentIds(profileId, instrumentIds) {
+        return this.prisma.profile.update({
+            where: { id: profileId },
+            data: {
+                instruments: {
+                    disconnect: instrumentIds.map((id) => ({ id })),
+                },
+            },
+            include: {
+                instruments: true,
+                styles: true,
+            },
+        });
+    }
+    addStyleIds(profileId, styleIds) {
         return this.prisma.profile.update({
             where: { id: profileId },
             data: {
                 styles: {
-                    connectOrCreate: styles.map((name) => ({
-                        where: { name },
-                        create: { name },
-                    })),
+                    connect: styleIds.map((id) => ({ id })),
+                },
+            },
+            include: {
+                instruments: true,
+                styles: true,
+            },
+        });
+    }
+    setStyleIds(profileId, styleIds) {
+        return this.prisma.profile.update({
+            where: { id: profileId },
+            data: {
+                styles: {
+                    set: styleIds.map((id) => ({ id })),
+                },
+            },
+            include: {
+                instruments: true,
+                styles: true,
+            },
+        });
+    }
+    removeStyleIds(profileId, styleIds) {
+        return this.prisma.profile.update({
+            where: { id: profileId },
+            data: {
+                styles: {
+                    disconnect: styleIds.map((id) => ({ id })),
                 },
             },
             include: {
