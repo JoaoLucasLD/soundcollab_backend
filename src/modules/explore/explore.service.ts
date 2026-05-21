@@ -6,6 +6,10 @@ import {
 } from './dto/explore-musician-response.dto';
 import { ExploreMusiciansQueryDto } from './dto/explore-musicians-query.dto';
 import { ExploreRepository } from './explore.repository';
+import {
+  calculateAge,
+  decryptBirthDate,
+} from '../profiles/profile-birth-date.crypto';
 
 type NormalizedExploreFilters = {
   instrument?: string;
@@ -41,17 +45,22 @@ export class ExploreService {
       ...filters,
     });
 
-    const musicians = profiles.map<ExploreMusicianResponseDto>((profile) => ({
-      id: profile.id,
-      userId: profile.userId,
-      displayName: profile.displayName,
-      city: profile.city,
-      gender: profile.gender,
-      experience: profile.experience,
-      preferences: profile.preferences,
-      instruments: profile.instruments.map((item) => item.name),
-      styles: profile.styles.map((item) => item.name),
-    }));
+    const musicians = profiles.map<ExploreMusicianResponseDto>((profile) => {
+      const birthDate = decryptBirthDate(profile.birthDateEncrypted);
+
+      return {
+        id: profile.id,
+        userId: profile.userId,
+        displayName: profile.displayName,
+        city: profile.city,
+        gender: profile.gender,
+        age: calculateAge(birthDate),
+        experience: profile.experience,
+        preferences: profile.preferences,
+        instruments: profile.instruments.map((item) => item.name),
+        styles: profile.styles.map((item) => item.name),
+      };
+    });
 
     return {
       musicians,

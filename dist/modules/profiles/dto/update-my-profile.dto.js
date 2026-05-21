@@ -35,6 +35,11 @@ __decorate([
 ], UpdateMyProfileDto.prototype, "gender", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateMyProfileDto.prototype, "birthDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
     (0, class_validator_1.Max)(100),
@@ -58,4 +63,22 @@ __decorate([
     (0, class_validator_1.IsEnum)(client_1.CollaborationGoal, { each: true }),
     __metadata("design:type", Array)
 ], UpdateMyProfileDto.prototype, "collaborationGoals", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsEnum)(client_1.AvailabilityPeriod, { each: true }),
+    __metadata("design:type", Array)
+], UpdateMyProfileDto.prototype, "availabilityPeriods", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsEnum)(client_1.AvailabilityTime, { each: true }),
+    __metadata("design:type", Array)
+], UpdateMyProfileDto.prototype, "availabilityTimes", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(300),
+    __metadata("design:type", String)
+], UpdateMyProfileDto.prototype, "availabilityNotes", void 0);
 //# sourceMappingURL=update-my-profile.dto.js.map

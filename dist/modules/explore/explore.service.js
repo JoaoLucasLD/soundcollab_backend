@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExploreService = void 0;
 const common_1 = require("@nestjs/common");
 const explore_repository_1 = require("./explore.repository");
+const profile_birth_date_crypto_1 = require("../profiles/profile-birth-date.crypto");
 let ExploreService = class ExploreService {
     constructor(exploreRepository) {
         this.exploreRepository = exploreRepository;
@@ -27,17 +28,21 @@ let ExploreService = class ExploreService {
             excludeUserId: userId,
             ...filters,
         });
-        const musicians = profiles.map((profile) => ({
-            id: profile.id,
-            userId: profile.userId,
-            displayName: profile.displayName,
-            city: profile.city,
-            gender: profile.gender,
-            experience: profile.experience,
-            preferences: profile.preferences,
-            instruments: profile.instruments.map((item) => item.name),
-            styles: profile.styles.map((item) => item.name),
-        }));
+        const musicians = profiles.map((profile) => {
+            const birthDate = (0, profile_birth_date_crypto_1.decryptBirthDate)(profile.birthDateEncrypted);
+            return {
+                id: profile.id,
+                userId: profile.userId,
+                displayName: profile.displayName,
+                city: profile.city,
+                gender: profile.gender,
+                age: (0, profile_birth_date_crypto_1.calculateAge)(birthDate),
+                experience: profile.experience,
+                preferences: profile.preferences,
+                instruments: profile.instruments.map((item) => item.name),
+                styles: profile.styles.map((item) => item.name),
+            };
+        });
         return {
             musicians,
             total: musicians.length,

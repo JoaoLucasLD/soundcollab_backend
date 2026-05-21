@@ -3,13 +3,27 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CollaborationGoal, Gender, Instrument, Profile, Style } from '@prisma/client';
+import {
+  AvailabilityPeriod,
+  AvailabilityTime,
+  CollaborationGoal,
+  Gender,
+  Instrument,
+  Profile,
+  Style,
+} from '@prisma/client';
 import { ProfileResponseDto } from './dto/profile-response.dto';
 import { RemoveProfileInstrumentsDto } from './dto/remove-profile-instruments.dto';
 import { RemoveProfileStylesDto } from './dto/remove-profile-styles.dto';
 import { UpdateMyProfileDto } from './dto/update-my-profile.dto';
 import { UpdateProfileInstrumentsDto } from './dto/update-profile-instruments.dto';
 import { UpdateProfileStylesDto } from './dto/update-profile-styles.dto';
+import {
+  calculateAge,
+  decryptBirthDate,
+  encryptBirthDate,
+  normalizeBirthDate,
+} from './profile-birth-date.crypto';
 import { ProfilesRepository } from './profiles.repository';
 
 type ProfileWithRelations = Profile & {
@@ -58,10 +72,14 @@ export class ProfilesService {
         displayName: data.displayName,
         city: data.city ?? null,
         gender: data.gender ?? null,
+        birthDateEncrypted: data.birthDateEncrypted ?? null,
         experience: data.experience ?? null,
         preferences: data.preferences ?? null,
         bio: data.bio ?? null,
         collaborationGoals: data.collaborationGoals ?? [],
+        availabilityPeriods: data.availabilityPeriods ?? [],
+        availabilityTimes: data.availabilityTimes ?? [],
+        availabilityNotes: data.availabilityNotes ?? null,
       });
       return this.toResponse(createdProfile);
     }
@@ -205,19 +223,27 @@ export class ProfilesService {
     displayName?: string;
     city?: string | null;
     gender?: Gender | null;
+    birthDateEncrypted?: string | null;
     experience?: number | null;
     preferences?: string | null;
     bio?: string | null;
     collaborationGoals?: CollaborationGoal[];
+    availabilityPeriods?: AvailabilityPeriod[];
+    availabilityTimes?: AvailabilityTime[];
+    availabilityNotes?: string | null;
   } {
     const data: {
       displayName?: string;
       city?: string | null;
       gender?: Gender | null;
+      birthDateEncrypted?: string | null;
       experience?: number | null;
       preferences?: string | null;
       bio?: string | null;
       collaborationGoals?: CollaborationGoal[];
+      availabilityPeriods?: AvailabilityPeriod[];
+      availabilityTimes?: AvailabilityTime[];
+      availabilityNotes?: string | null;
     } = {};
 
     if (input.displayName !== undefined) {
@@ -232,6 +258,10 @@ export class ProfilesService {
     if (input.gender !== undefined) {
       data.gender = input.gender;
     }
+    if (input.birthDate !== undefined) {
+      const normalizedBirthDate = normalizeBirthDate(input.birthDate);
+      data.birthDateEncrypted = encryptBirthDate(normalizedBirthDate);
+    }
     if (input.experience !== undefined) {
       data.experience = input.experience;
     }
@@ -243,6 +273,17 @@ export class ProfilesService {
     }
     if (input.collaborationGoals !== undefined) {
       data.collaborationGoals = [...new Set(input.collaborationGoals)];
+    }
+    if (input.availabilityPeriods !== undefined) {
+      data.availabilityPeriods = [...new Set(input.availabilityPeriods)];
+    }
+    if (input.availabilityTimes !== undefined) {
+      data.availabilityTimes = [...new Set(input.availabilityTimes)];
+    }
+    if (input.availabilityNotes !== undefined) {
+      data.availabilityNotes = this.normalizeNullableText(
+        input.availabilityNotes,
+      );
     }
 
     return data;
@@ -303,16 +344,22 @@ export class ProfilesService {
   }
 
   private toResponse(profile: ProfileWithRelations): ProfileResponseDto {
+    const birthDate = decryptBirthDate(profile.birthDateEncrypted);
+
     return {
       id: profile.id,
       userId: profile.userId,
       displayName: profile.displayName,
       city: profile.city,
       gender: profile.gender,
+      age: calculateAge(birthDate),
       experience: profile.experience,
       preferences: profile.preferences,
       bio: profile.bio,
       collaborationGoals: profile.collaborationGoals,
+      availabilityPeriods: profile.availabilityPeriods,
+      availabilityTimes: profile.availabilityTimes,
+      availabilityNotes: profile.availabilityNotes,
       instruments: profile.instruments.map((item) => item.name),
       styles: profile.styles.map((item) => item.name),
       createdAt: profile.createdAt,

@@ -1,5 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import {
+  calculateAge,
+  decryptBirthDate,
+} from '../profiles/profile-birth-date.crypto';
 import { MeResponseDto } from './dto/me-response.dto';
 
 @Injectable()
@@ -23,6 +27,10 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
+    const birthDate = user.profile
+      ? decryptBirthDate(user.profile.birthDateEncrypted)
+      : null;
+
     return {
       id: user.id,
       email: user.email,
@@ -33,10 +41,15 @@ export class UsersService {
             displayName: user.profile.displayName,
             city: user.profile.city,
             gender: user.profile.gender,
+            birthDate,
+            age: calculateAge(birthDate),
             experience: user.profile.experience,
             preferences: user.profile.preferences,
             bio: user.profile.bio,
             collaborationGoals: user.profile.collaborationGoals,
+            availabilityPeriods: user.profile.availabilityPeriods,
+            availabilityTimes: user.profile.availabilityTimes,
+            availabilityNotes: user.profile.availabilityNotes,
             instruments: user.profile.instruments.map((item) => item.name),
             styles: user.profile.styles.map((item) => item.name),
           }

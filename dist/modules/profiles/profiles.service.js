@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProfilesService = void 0;
 const common_1 = require("@nestjs/common");
+const profile_birth_date_crypto_1 = require("./profile-birth-date.crypto");
 const profiles_repository_1 = require("./profiles.repository");
 let ProfilesService = class ProfilesService {
     constructor(profilesRepository) {
@@ -19,19 +20,19 @@ let ProfilesService = class ProfilesService {
     async getByUserId(userId) {
         const profile = await this.profilesRepository.findByUserId(userId);
         if (!profile) {
-            throw new common_1.NotFoundException('Profile not found');
+            throw new common_1.NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
         }
         return this.toResponse(profile);
     }
     async getById(profileId) {
         const profile = await this.profilesRepository.findById(profileId);
         if (!profile) {
-            throw new common_1.NotFoundException('Profile not found');
+            throw new common_1.NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
         }
         return this.toResponse(profile);
     }
     async upsertMyProfile(userId, input) {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         const existingProfile = await this.profilesRepository.findByUserId(userId);
         const data = this.normalizeProfileUpdate(input);
         if (!existingProfile) {
@@ -43,10 +44,14 @@ let ProfilesService = class ProfilesService {
                 displayName: data.displayName,
                 city: (_a = data.city) !== null && _a !== void 0 ? _a : null,
                 gender: (_b = data.gender) !== null && _b !== void 0 ? _b : null,
-                experience: (_c = data.experience) !== null && _c !== void 0 ? _c : null,
-                preferences: (_d = data.preferences) !== null && _d !== void 0 ? _d : null,
-                bio: (_e = data.bio) !== null && _e !== void 0 ? _e : null,
-                collaborationGoals: (_f = data.collaborationGoals) !== null && _f !== void 0 ? _f : [],
+                birthDateEncrypted: (_c = data.birthDateEncrypted) !== null && _c !== void 0 ? _c : null,
+                experience: (_d = data.experience) !== null && _d !== void 0 ? _d : null,
+                preferences: (_e = data.preferences) !== null && _e !== void 0 ? _e : null,
+                bio: (_f = data.bio) !== null && _f !== void 0 ? _f : null,
+                collaborationGoals: (_g = data.collaborationGoals) !== null && _g !== void 0 ? _g : [],
+                availabilityPeriods: (_h = data.availabilityPeriods) !== null && _h !== void 0 ? _h : [],
+                availabilityTimes: (_j = data.availabilityTimes) !== null && _j !== void 0 ? _j : [],
+                availabilityNotes: (_k = data.availabilityNotes) !== null && _k !== void 0 ? _k : null,
             });
             return this.toResponse(createdProfile);
         }
@@ -59,7 +64,7 @@ let ProfilesService = class ProfilesService {
     async addMyInstruments(userId, input) {
         const profile = await this.profilesRepository.findByUserId(userId);
         if (!profile) {
-            throw new common_1.NotFoundException('Profile not found');
+            throw new common_1.NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
         }
         const instrumentIds = this.normalizeIdList(input.instrumentIds, 'instrument');
         await this.ensureInstrumentsExist(instrumentIds);
@@ -69,7 +74,7 @@ let ProfilesService = class ProfilesService {
     async replaceMyInstruments(userId, input) {
         const profile = await this.profilesRepository.findByUserId(userId);
         if (!profile) {
-            throw new common_1.NotFoundException('Profile not found');
+            throw new common_1.NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
         }
         const instrumentIds = this.normalizeIdList(input.instrumentIds, 'instrument', {
             allowEmpty: true,
@@ -81,7 +86,7 @@ let ProfilesService = class ProfilesService {
     async removeMyInstruments(userId, input) {
         const profile = await this.profilesRepository.findByUserId(userId);
         if (!profile) {
-            throw new common_1.NotFoundException('Profile not found');
+            throw new common_1.NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
         }
         const instrumentIds = this.normalizeIdList(input.instrumentIds, 'instrument');
         await this.ensureInstrumentsExist(instrumentIds);
@@ -91,7 +96,7 @@ let ProfilesService = class ProfilesService {
     async addMyStyles(userId, input) {
         const profile = await this.profilesRepository.findByUserId(userId);
         if (!profile) {
-            throw new common_1.NotFoundException('Profile not found');
+            throw new common_1.NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
         }
         const styleIds = this.normalizeIdList(input.styleIds, 'style');
         await this.ensureStylesExist(styleIds);
@@ -101,7 +106,7 @@ let ProfilesService = class ProfilesService {
     async replaceMyStyles(userId, input) {
         const profile = await this.profilesRepository.findByUserId(userId);
         if (!profile) {
-            throw new common_1.NotFoundException('Profile not found');
+            throw new common_1.NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
         }
         const styleIds = this.normalizeIdList(input.styleIds, 'style', {
             allowEmpty: true,
@@ -113,7 +118,7 @@ let ProfilesService = class ProfilesService {
     async removeMyStyles(userId, input) {
         const profile = await this.profilesRepository.findByUserId(userId);
         if (!profile) {
-            throw new common_1.NotFoundException('Profile not found');
+            throw new common_1.NotFoundException('Perfil não encontrado para o usuário. Tente novamente.');
         }
         const styleIds = this.normalizeIdList(input.styleIds, 'style');
         await this.ensureStylesExist(styleIds);
@@ -131,6 +136,10 @@ let ProfilesService = class ProfilesService {
         if (input.gender !== undefined) {
             data.gender = input.gender;
         }
+        if (input.birthDate !== undefined) {
+            const normalizedBirthDate = (0, profile_birth_date_crypto_1.normalizeBirthDate)(input.birthDate);
+            data.birthDateEncrypted = (0, profile_birth_date_crypto_1.encryptBirthDate)(normalizedBirthDate);
+        }
         if (input.experience !== undefined) {
             data.experience = input.experience;
         }
@@ -142,6 +151,15 @@ let ProfilesService = class ProfilesService {
         }
         if (input.collaborationGoals !== undefined) {
             data.collaborationGoals = [...new Set(input.collaborationGoals)];
+        }
+        if (input.availabilityPeriods !== undefined) {
+            data.availabilityPeriods = [...new Set(input.availabilityPeriods)];
+        }
+        if (input.availabilityTimes !== undefined) {
+            data.availabilityTimes = [...new Set(input.availabilityTimes)];
+        }
+        if (input.availabilityNotes !== undefined) {
+            data.availabilityNotes = this.normalizeNullableText(input.availabilityNotes);
         }
         return data;
     }
@@ -185,16 +203,21 @@ let ProfilesService = class ProfilesService {
         }
     }
     toResponse(profile) {
+        const birthDate = (0, profile_birth_date_crypto_1.decryptBirthDate)(profile.birthDateEncrypted);
         return {
             id: profile.id,
             userId: profile.userId,
             displayName: profile.displayName,
             city: profile.city,
             gender: profile.gender,
+            age: (0, profile_birth_date_crypto_1.calculateAge)(birthDate),
             experience: profile.experience,
             preferences: profile.preferences,
             bio: profile.bio,
             collaborationGoals: profile.collaborationGoals,
+            availabilityPeriods: profile.availabilityPeriods,
+            availabilityTimes: profile.availabilityTimes,
+            availabilityNotes: profile.availabilityNotes,
             instruments: profile.instruments.map((item) => item.name),
             styles: profile.styles.map((item) => item.name),
             createdAt: profile.createdAt,

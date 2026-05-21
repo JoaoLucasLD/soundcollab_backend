@@ -1,4 +1,4 @@
-import { CollaborationGoal, Gender, Instrument, Profile, Style } from '@prisma/client';
+import { AvailabilityPeriod, AvailabilityTime, CollaborationGoal, Gender, Instrument, Profile, Style } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 type ProfileWithRelations = Profile & {
     instruments: Instrument[];
@@ -9,19 +9,27 @@ type CreateProfileParams = {
     displayName: string;
     city: string | null;
     gender: Gender | null;
+    birthDateEncrypted: string | null;
     experience: number | null;
     preferences: string | null;
     bio: string | null;
     collaborationGoals: CollaborationGoal[];
+    availabilityPeriods: AvailabilityPeriod[];
+    availabilityTimes: AvailabilityTime[];
+    availabilityNotes: string | null;
 };
 type UpdateProfileParams = {
     displayName?: string;
     city?: string | null;
     gender?: Gender | null;
+    birthDateEncrypted?: string | null;
     experience?: number | null;
     preferences?: string | null;
     bio?: string | null;
     collaborationGoals?: CollaborationGoal[];
+    availabilityPeriods?: AvailabilityPeriod[];
+    availabilityTimes?: AvailabilityTime[];
+    availabilityNotes?: string | null;
 };
 export declare class ProfilesRepository {
     private readonly prisma;

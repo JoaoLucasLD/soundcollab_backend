@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../database/prisma.service");
+const profile_birth_date_crypto_1 = require("../profiles/profile-birth-date.crypto");
 let UsersService = class UsersService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -31,6 +32,9 @@ let UsersService = class UsersService {
         if (!user) {
             throw new common_1.NotFoundException('User not found');
         }
+        const birthDate = user.profile
+            ? (0, profile_birth_date_crypto_1.decryptBirthDate)(user.profile.birthDateEncrypted)
+            : null;
         return {
             id: user.id,
             email: user.email,
@@ -41,10 +45,15 @@ let UsersService = class UsersService {
                     displayName: user.profile.displayName,
                     city: user.profile.city,
                     gender: user.profile.gender,
+                    birthDate,
+                    age: (0, profile_birth_date_crypto_1.calculateAge)(birthDate),
                     experience: user.profile.experience,
                     preferences: user.profile.preferences,
                     bio: user.profile.bio,
                     collaborationGoals: user.profile.collaborationGoals,
+                    availabilityPeriods: user.profile.availabilityPeriods,
+                    availabilityTimes: user.profile.availabilityTimes,
+                    availabilityNotes: user.profile.availabilityNotes,
                     instruments: user.profile.instruments.map((item) => item.name),
                     styles: user.profile.styles.map((item) => item.name),
                 }

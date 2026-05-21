@@ -1,5 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { CollaborationGoal, Gender, Instrument, Profile, Style } from '@prisma/client';
+import {
+  AvailabilityPeriod,
+  AvailabilityTime,
+  CollaborationGoal,
+  Gender,
+  Instrument,
+  Profile,
+  Style,
+} from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 
 type ProfileWithRelations = Profile & {
@@ -12,20 +20,28 @@ type CreateProfileParams = {
   displayName: string;
   city: string | null;
   gender: Gender | null;
+  birthDateEncrypted: string | null;
   experience: number | null;
   preferences: string | null;
   bio: string | null;
   collaborationGoals: CollaborationGoal[];
+  availabilityPeriods: AvailabilityPeriod[];
+  availabilityTimes: AvailabilityTime[];
+  availabilityNotes: string | null;
 };
 
 type UpdateProfileParams = {
   displayName?: string;
   city?: string | null;
   gender?: Gender | null;
+  birthDateEncrypted?: string | null;
   experience?: number | null;
   preferences?: string | null;
   bio?: string | null;
   collaborationGoals?: CollaborationGoal[];
+  availabilityPeriods?: AvailabilityPeriod[];
+  availabilityTimes?: AvailabilityTime[];
+  availabilityNotes?: string | null;
 };
 
 @Injectable()
@@ -59,10 +75,14 @@ export class ProfilesRepository {
         displayName: params.displayName,
         city: params.city,
         gender: params.gender,
+        birthDateEncrypted: params.birthDateEncrypted,
         experience: params.experience,
         preferences: params.preferences,
         bio: params.bio,
         collaborationGoals: params.collaborationGoals,
+        availabilityPeriods: params.availabilityPeriods,
+        availabilityTimes: params.availabilityTimes,
+        availabilityNotes: params.availabilityNotes,
       },
       include: {
         instruments: true,

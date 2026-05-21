@@ -6,6 +6,7 @@ export class ExploreMusicianResponseDto {
   displayName!: string;
   city!: string | null;
   gender!: Gender | null;
+  age!: number | null;
   experience!: number | null;
   preferences!: string | null;
   instruments!: string[];

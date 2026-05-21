@@ -9,7 +9,12 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-import { CollaborationGoal, Gender } from '@prisma/client';
+import {
+  AvailabilityPeriod,
+  AvailabilityTime,
+  CollaborationGoal,
+  Gender,
+} from '@prisma/client';
 
 export class UpdateMyProfileDto {
   @IsOptional()
@@ -26,6 +31,10 @@ export class UpdateMyProfileDto {
   @IsOptional()
   @IsEnum(Gender)
   gender?: Gender;
+
+  @IsOptional()
+  @IsString()
+  birthDate?: string;
 
   @IsOptional()
   @IsInt()
@@ -47,4 +56,19 @@ export class UpdateMyProfileDto {
   @IsArray()
   @IsEnum(CollaborationGoal, { each: true })
   collaborationGoals?: CollaborationGoal[];
+
+  @IsOptional()
+  @IsArray()
+  @IsEnum(AvailabilityPeriod, { each: true })
+  availabilityPeriods?: AvailabilityPeriod[];
+
+  @IsOptional()
+  @IsArray()
+  @IsEnum(AvailabilityTime, { each: true })
+  availabilityTimes?: AvailabilityTime[];
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  availabilityNotes?: string;
 }
