@@ -4,6 +4,9 @@ export declare class ExploreMusiciansQueryDto {
     style?: string;
     city?: string;
     gender?: Gender;
+    latitude?: number;
+    longitude?: number;
+    radiusKm?: number;
     experienceMin?: number;
     experienceMax?: number;
 }

@@ -2,6 +2,8 @@ import { AvailabilityPeriod, AvailabilityTime, CollaborationGoal, Gender } from 
 export declare class UpdateMyProfileDto {
     displayName?: string;
     city?: string;
+    latitude?: number | null;
+    longitude?: number | null;
     gender?: Gender;
     birthDate?: string;
     experience?: number;

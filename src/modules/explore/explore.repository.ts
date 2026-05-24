@@ -21,6 +21,16 @@ type ProfileWithRelations = Profile & {
 export class ExploreRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  findProfileLocation(userId: string) {
+    return this.prisma.profile.findUnique({
+      where: { userId },
+      select: {
+        latitude: true,
+        longitude: true,
+      },
+    });
+  }
+
   findMusicians(filters: ExploreFilters): Promise<ProfileWithRelations[]> {
     const where: Prisma.ProfileWhereInput = {
       userId: {

@@ -16,6 +16,15 @@ let ExploreRepository = class ExploreRepository {
     constructor(prisma) {
         this.prisma = prisma;
     }
+    findProfileLocation(userId) {
+        return this.prisma.profile.findUnique({
+            where: { userId },
+            select: {
+                latitude: true,
+                longitude: true,
+            },
+        });
+    }
     findMusicians(filters) {
         const where = {
             userId: {

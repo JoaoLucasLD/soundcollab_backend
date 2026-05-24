@@ -8,6 +8,8 @@ type CreateProfileParams = {
     userId: string;
     displayName: string;
     city: string | null;
+    latitude: number | null;
+    longitude: number | null;
     gender: Gender | null;
     birthDateEncrypted: string | null;
     experience: number | null;
@@ -21,6 +23,8 @@ type CreateProfileParams = {
 type UpdateProfileParams = {
     displayName?: string;
     city?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     gender?: Gender | null;
     birthDateEncrypted?: string | null;
     experience?: number | null;

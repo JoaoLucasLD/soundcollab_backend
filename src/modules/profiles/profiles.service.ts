@@ -71,6 +71,8 @@ export class ProfilesService {
         userId,
         displayName: data.displayName,
         city: data.city ?? null,
+        latitude: data.latitude ?? null,
+        longitude: data.longitude ?? null,
         gender: data.gender ?? null,
         birthDateEncrypted: data.birthDateEncrypted ?? null,
         experience: data.experience ?? null,
@@ -222,6 +224,8 @@ export class ProfilesService {
   private normalizeProfileUpdate(input: UpdateMyProfileDto): {
     displayName?: string;
     city?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     gender?: Gender | null;
     birthDateEncrypted?: string | null;
     experience?: number | null;
@@ -235,6 +239,8 @@ export class ProfilesService {
     const data: {
       displayName?: string;
       city?: string | null;
+      latitude?: number | null;
+      longitude?: number | null;
       gender?: Gender | null;
       birthDateEncrypted?: string | null;
       experience?: number | null;
@@ -254,6 +260,17 @@ export class ProfilesService {
     }
     if (input.city !== undefined) {
       data.city = this.normalizeNullableText(input.city);
+    }
+    if (
+      (input.latitude === undefined) !== (input.longitude === undefined)
+    ) {
+      throw new BadRequestException(
+        'latitude and longitude must be provided together',
+      );
+    }
+    if (input.latitude !== undefined && input.longitude !== undefined) {
+      data.latitude = input.latitude;
+      data.longitude = input.longitude;
     }
     if (input.gender !== undefined) {
       data.gender = input.gender;

@@ -44,6 +44,8 @@ let UsersService = class UsersService {
                     id: user.profile.id,
                     displayName: user.profile.displayName,
                     city: user.profile.city,
+                    latitude: user.profile.latitude,
+                    longitude: user.profile.longitude,
                     gender: user.profile.gender,
                     birthDate,
                     age: (0, profile_birth_date_crypto_1.calculateAge)(birthDate),

@@ -32,7 +32,7 @@ let ProfilesService = class ProfilesService {
         return this.toResponse(profile);
     }
     async upsertMyProfile(userId, input) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
         const existingProfile = await this.profilesRepository.findByUserId(userId);
         const data = this.normalizeProfileUpdate(input);
         if (!existingProfile) {
@@ -43,15 +43,17 @@ let ProfilesService = class ProfilesService {
                 userId,
                 displayName: data.displayName,
                 city: (_a = data.city) !== null && _a !== void 0 ? _a : null,
-                gender: (_b = data.gender) !== null && _b !== void 0 ? _b : null,
-                birthDateEncrypted: (_c = data.birthDateEncrypted) !== null && _c !== void 0 ? _c : null,
-                experience: (_d = data.experience) !== null && _d !== void 0 ? _d : null,
-                preferences: (_e = data.preferences) !== null && _e !== void 0 ? _e : null,
-                bio: (_f = data.bio) !== null && _f !== void 0 ? _f : null,
-                collaborationGoals: (_g = data.collaborationGoals) !== null && _g !== void 0 ? _g : [],
-                availabilityPeriods: (_h = data.availabilityPeriods) !== null && _h !== void 0 ? _h : [],
-                availabilityTimes: (_j = data.availabilityTimes) !== null && _j !== void 0 ? _j : [],
-                availabilityNotes: (_k = data.availabilityNotes) !== null && _k !== void 0 ? _k : null,
+                latitude: (_b = data.latitude) !== null && _b !== void 0 ? _b : null,
+                longitude: (_c = data.longitude) !== null && _c !== void 0 ? _c : null,
+                gender: (_d = data.gender) !== null && _d !== void 0 ? _d : null,
+                birthDateEncrypted: (_e = data.birthDateEncrypted) !== null && _e !== void 0 ? _e : null,
+                experience: (_f = data.experience) !== null && _f !== void 0 ? _f : null,
+                preferences: (_g = data.preferences) !== null && _g !== void 0 ? _g : null,
+                bio: (_h = data.bio) !== null && _h !== void 0 ? _h : null,
+                collaborationGoals: (_j = data.collaborationGoals) !== null && _j !== void 0 ? _j : [],
+                availabilityPeriods: (_k = data.availabilityPeriods) !== null && _k !== void 0 ? _k : [],
+                availabilityTimes: (_l = data.availabilityTimes) !== null && _l !== void 0 ? _l : [],
+                availabilityNotes: (_m = data.availabilityNotes) !== null && _m !== void 0 ? _m : null,
             });
             return this.toResponse(createdProfile);
         }
@@ -132,6 +134,13 @@ let ProfilesService = class ProfilesService {
         }
         if (input.city !== undefined) {
             data.city = this.normalizeNullableText(input.city);
+        }
+        if ((input.latitude === undefined) !== (input.longitude === undefined)) {
+            throw new common_1.BadRequestException('latitude and longitude must be provided together');
+        }
+        if (input.latitude !== undefined && input.longitude !== undefined) {
+            data.latitude = input.latitude;
+            data.longitude = input.longitude;
         }
         if (input.gender !== undefined) {
             data.gender = input.gender;

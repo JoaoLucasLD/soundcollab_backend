@@ -19,6 +19,8 @@ type CreateProfileParams = {
   userId: string;
   displayName: string;
   city: string | null;
+  latitude: number | null;
+  longitude: number | null;
   gender: Gender | null;
   birthDateEncrypted: string | null;
   experience: number | null;
@@ -33,6 +35,8 @@ type CreateProfileParams = {
 type UpdateProfileParams = {
   displayName?: string;
   city?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   gender?: Gender | null;
   birthDateEncrypted?: string | null;
   experience?: number | null;
@@ -74,6 +78,8 @@ export class ProfilesRepository {
         userId: params.userId,
         displayName: params.displayName,
         city: params.city,
+        latitude: params.latitude,
+        longitude: params.longitude,
         gender: params.gender,
         birthDateEncrypted: params.birthDateEncrypted,
         experience: params.experience,

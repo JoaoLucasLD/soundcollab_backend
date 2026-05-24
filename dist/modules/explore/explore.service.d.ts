@@ -6,5 +6,6 @@ export declare class ExploreService {
     constructor(exploreRepository: ExploreRepository);
     listMusicians(userId: string, query: ExploreMusiciansQueryDto): Promise<ExploreMusiciansResponseDto>;
     private normalizeFilters;
+    private resolveDistanceOrigin;
     private normalizeOptionalText;
 }

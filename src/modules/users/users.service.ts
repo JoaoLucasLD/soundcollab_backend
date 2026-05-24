@@ -40,6 +40,8 @@ export class UsersService {
             id: user.profile.id,
             displayName: user.profile.displayName,
             city: user.profile.city,
+            latitude: user.profile.latitude,
+            longitude: user.profile.longitude,
             gender: user.profile.gender,
             birthDate,
             age: calculateAge(birthDate),

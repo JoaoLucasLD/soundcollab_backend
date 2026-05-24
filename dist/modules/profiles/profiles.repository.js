@@ -40,6 +40,8 @@ let ProfilesRepository = class ProfilesRepository {
                 userId: params.userId,
                 displayName: params.displayName,
                 city: params.city,
+                latitude: params.latitude,
+                longitude: params.longitude,
                 gender: params.gender,
                 birthDateEncrypted: params.birthDateEncrypted,
                 experience: params.experience,

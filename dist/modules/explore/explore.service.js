@@ -24,11 +24,40 @@ let ExploreService = class ExploreService {
             filters.experienceMin > filters.experienceMax) {
             throw new common_1.BadRequestException('experienceMin must be less than or equal to experienceMax');
         }
+        const origin = await this.resolveDistanceOrigin(userId, filters);
         const profiles = await this.exploreRepository.findMusicians({
             excludeUserId: userId,
             ...filters,
         });
-        const musicians = profiles.map((profile) => {
+        const musicians = profiles
+            .map((profile) => ({
+            profile,
+            distanceKm: origin
+                ? calculateDistanceKm(origin, {
+                    latitude: profile.latitude,
+                    longitude: profile.longitude,
+                })
+                : null,
+        }))
+            .filter((item) => {
+            if (!origin || filters.radiusKm === undefined) {
+                return true;
+            }
+            return item.distanceKm !== null && item.distanceKm <= filters.radiusKm;
+        })
+            .sort((firstItem, secondItem) => {
+            if (firstItem.distanceKm === null && secondItem.distanceKm === null) {
+                return firstItem.profile.displayName.localeCompare(secondItem.profile.displayName);
+            }
+            if (firstItem.distanceKm === null) {
+                return 1;
+            }
+            if (secondItem.distanceKm === null) {
+                return -1;
+            }
+            return firstItem.distanceKm - secondItem.distanceKm;
+        })
+            .map(({ profile, distanceKm }) => {
             const birthDate = (0, profile_birth_date_crypto_1.decryptBirthDate)(profile.birthDateEncrypted);
             return {
                 id: profile.id,
@@ -37,6 +66,7 @@ let ExploreService = class ExploreService {
                 city: profile.city,
                 gender: profile.gender,
                 age: (0, profile_birth_date_crypto_1.calculateAge)(birthDate),
+                distanceKm: distanceKm === null ? null : Math.round(distanceKm),
                 experience: profile.experience,
                 preferences: profile.preferences,
                 instruments: profile.instruments.map((item) => item.name),
@@ -59,8 +89,37 @@ let ExploreService = class ExploreService {
             style,
             city,
             gender,
+            latitude: query.latitude,
+            longitude: query.longitude,
+            radiusKm: query.radiusKm,
             experienceMin: query.experienceMin,
             experienceMax: query.experienceMax,
+        };
+    }
+    async resolveDistanceOrigin(userId, filters) {
+        if (filters.radiusKm === undefined) {
+            return null;
+        }
+        if ((filters.latitude === undefined) !==
+            (filters.longitude === undefined)) {
+            throw new common_1.BadRequestException('latitude and longitude must be provided together');
+        }
+        if (filters.latitude !== undefined && filters.longitude !== undefined) {
+            return {
+                latitude: filters.latitude,
+                longitude: filters.longitude,
+            };
+        }
+        const profileLocation = await this.exploreRepository.findProfileLocation(userId);
+        if ((profileLocation === null || profileLocation === void 0 ? void 0 : profileLocation.latitude) === null ||
+            (profileLocation === null || profileLocation === void 0 ? void 0 : profileLocation.latitude) === undefined ||
+            profileLocation.longitude === null ||
+            profileLocation.longitude === undefined) {
+            throw new common_1.BadRequestException('Profile location is required to filter by distance');
+        }
+        return {
+            latitude: profileLocation.latitude,
+            longitude: profileLocation.longitude,
         };
     }
     normalizeOptionalText(value) {
@@ -76,4 +135,24 @@ exports.ExploreService = ExploreService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [explore_repository_1.ExploreRepository])
 ], ExploreService);
+function calculateDistanceKm(origin, destination) {
+    if (destination.latitude === null || destination.longitude === null) {
+        return null;
+    }
+    const earthRadiusKm = 6378;
+    const latitudeDelta = toRadians(destination.latitude - origin.latitude);
+    const longitudeDelta = toRadians(destination.longitude - origin.longitude);
+    const originLatitude = toRadians(origin.latitude);
+    const destinationLatitude = toRadians(destination.latitude);
+    const haversine = Math.sin(latitudeDelta / 2) ** 2 +
+        Math.cos(originLatitude) *
+            Math.cos(destinationLatitude) *
+            Math.sin(longitudeDelta / 2) ** 2;
+    return (2 *
+        earthRadiusKm *
+        Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine)));
+}
+function toRadians(value) {
+    return (value * Math.PI) / 180;
+}
 //# sourceMappingURL=explore.service.js.map
