@@ -107,6 +107,12 @@ export class CollaborationsRepository {
     });
   }
 
+  delete(collaborationId: string): Promise<Collaboration> {
+    return this.prisma.collaboration.delete({
+      where: { id: collaborationId },
+    });
+  }
+
   async findByUserWithFilters(
     filters: ListCollaborationsFilters,
   ): Promise<ListCollaborationsResult> {

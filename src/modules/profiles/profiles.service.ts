@@ -306,7 +306,11 @@ export class ProfilesService {
     return data;
   }
 
-  private normalizeNullableText(value: string): string | null {
+  private normalizeNullableText(value: string | null): string | null {
+    if (value === null) {
+      return null;
+    }
+
     const normalized = value.trim();
     return normalized.length > 0 ? normalized : null;
   }

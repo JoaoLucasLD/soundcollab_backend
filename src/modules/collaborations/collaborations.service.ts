@@ -76,6 +76,26 @@ export class CollaborationsService {
     );
   }
 
+  async cancel(requesterId: string, collaborationId: string): Promise<void> {
+    const collaboration =
+      await this.collaborationsRepository.findById(collaborationId);
+    if (!collaboration) {
+      throw new NotFoundException('Collaboration not found');
+    }
+
+    if (collaboration.requesterId !== requesterId) {
+      throw new ForbiddenException(
+        'Only the requester can cancel this collaboration',
+      );
+    }
+
+    if (collaboration.status !== CollaborationStatus.PENDING) {
+      throw new ConflictException('Collaboration is not pending');
+    }
+
+    await this.collaborationsRepository.delete(collaborationId);
+  }
+
   async listForUser(
     userId: string,
     query: ListCollaborationsQueryDto,

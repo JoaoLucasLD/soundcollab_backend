@@ -1,4 +1,4 @@
-import { Gender } from '@prisma/client';
+import { AvailabilityPeriod, AvailabilityTime, CollaborationGoal, Gender } from '@prisma/client';
 
 export class ExploreMusicianResponseDto {
   id!: string;
@@ -9,7 +9,11 @@ export class ExploreMusicianResponseDto {
   age!: number | null;
   distanceKm!: number | null;
   experience!: number | null;
+  bio!: string | null;
   preferences!: string | null;
+  collaborationGoals!: CollaborationGoal[];
+  availabilityPeriods!: AvailabilityPeriod[];
+  availabilityTimes!: AvailabilityTime[];
   instruments!: string[];
   styles!: string[];
 }

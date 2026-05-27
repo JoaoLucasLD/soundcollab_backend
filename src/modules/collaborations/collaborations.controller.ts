@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   Patch,
   Post,
@@ -52,5 +54,14 @@ export class CollaborationsController {
     @Param('id') collaborationId: string,
   ): Promise<CollaborationResponseDto> {
     return this.collaborationsService.reject(req.user.userId, collaborationId);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  cancel(
+    @Req() req: RequestWithUser,
+    @Param('id') collaborationId: string,
+  ): Promise<void> {
+    return this.collaborationsService.cancel(req.user.userId, collaborationId);
   }
 }

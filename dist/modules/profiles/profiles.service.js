@@ -173,6 +173,9 @@ let ProfilesService = class ProfilesService {
         return data;
     }
     normalizeNullableText(value) {
+        if (value === null) {
+            return null;
+        }
         const normalized = value.trim();
         return normalized.length > 0 ? normalized : null;
     }

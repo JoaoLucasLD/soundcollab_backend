@@ -68,7 +68,11 @@ let ExploreService = class ExploreService {
                 age: (0, profile_birth_date_crypto_1.calculateAge)(birthDate),
                 distanceKm: distanceKm === null ? null : Math.round(distanceKm),
                 experience: profile.experience,
+                bio: profile.bio,
                 preferences: profile.preferences,
+                collaborationGoals: profile.collaborationGoals,
+                availabilityPeriods: profile.availabilityPeriods,
+                availabilityTimes: profile.availabilityTimes,
                 instruments: profile.instruments.map((item) => item.name),
                 styles: profile.styles.map((item) => item.name),
             };

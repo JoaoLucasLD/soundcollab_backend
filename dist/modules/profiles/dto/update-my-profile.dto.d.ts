@@ -1,7 +1,7 @@
 import { AvailabilityPeriod, AvailabilityTime, CollaborationGoal, Gender } from '@prisma/client';
 export declare class UpdateMyProfileDto {
     displayName?: string;
-    city?: string;
+    city?: string | null;
     latitude?: number | null;
     longitude?: number | null;
     gender?: Gender;

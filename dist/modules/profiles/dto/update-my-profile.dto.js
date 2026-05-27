@@ -26,7 +26,7 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MaxLength)(120),
-    __metadata("design:type", String)
+    __metadata("design:type", Object)
 ], UpdateMyProfileDto.prototype, "city", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),

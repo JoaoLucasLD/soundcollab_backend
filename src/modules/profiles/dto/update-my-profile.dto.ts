@@ -27,7 +27,7 @@ export class UpdateMyProfileDto {
   @IsOptional()
   @IsString()
   @MaxLength(120)
-  city?: string;
+  city?: string | null;
 
   @IsOptional()
   @IsNumber()
