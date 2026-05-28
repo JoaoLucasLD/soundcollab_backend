@@ -1,4 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  AvailabilityPeriod,
+  AvailabilityTime,
+  CollaborationGoal,
+  Gender,
+} from '@prisma/client';
+import {
+  calculateAge,
+  decryptBirthDate,
+} from '../profiles/profile-birth-date.crypto';
 import { MatchmakingRankingQueryDto } from './dto/matchmaking-ranking-query.dto';
 import {
   MatchmakingRankingItemDto,
@@ -44,8 +54,14 @@ export class MatchmakingService {
           userId: candidate.userId,
           displayName: candidate.displayName,
           city: candidate.city,
+          gender: profile.gender,
+          age: calculateAge(decryptBirthDate(profile.birthDateEncrypted)),
           experience: candidate.experience,
+          bio: profile.bio,
           preferences: candidate.preferences,
+          collaborationGoals: candidate.collaborationGoals,
+          availabilityPeriods: candidate.availabilityPeriods,
+          availabilityTimes: candidate.availabilityTimes,
           instruments: candidate.instruments,
           styles: candidate.styles,
           totalScore: score.totalScore,
@@ -108,10 +124,16 @@ export class MatchmakingService {
     userId: string;
     displayName: string;
     city: string | null;
+    gender: Gender | null;
+    birthDateEncrypted: string | null;
     latitude?: number | null;
     longitude?: number | null;
     experience: number | null;
+    bio: string | null;
     preferences: string | null;
+    collaborationGoals: CollaborationGoal[];
+    availabilityPeriods: AvailabilityPeriod[];
+    availabilityTimes: AvailabilityTime[];
     instruments: { name: string }[];
     styles: { name: string }[];
   }): MatchmakingProfile {
@@ -124,6 +146,9 @@ export class MatchmakingService {
       longitude: profile.longitude,
       experience: profile.experience,
       preferences: profile.preferences,
+      collaborationGoals: profile.collaborationGoals,
+      availabilityPeriods: profile.availabilityPeriods,
+      availabilityTimes: profile.availabilityTimes,
       instruments: profile.instruments.map((item) => item.name),
       styles: profile.styles.map((item) => item.name),
     };

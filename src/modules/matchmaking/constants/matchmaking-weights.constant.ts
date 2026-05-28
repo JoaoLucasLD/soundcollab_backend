@@ -1,4 +1,6 @@
 export type MatchmakingCriterion =
+  | 'availability'
+  | 'collaborationGoals'
   | 'location'
   | 'style'
   | 'instrument'
@@ -6,18 +8,11 @@ export type MatchmakingCriterion =
 
 export type MatchmakingWeights = Record<MatchmakingCriterion, number>;
 
-export const MATCHMAKING_PRIORITY_ORDER: MatchmakingCriterion[] = [
-  'location',
-  'style',
-  'instrument',
-  'experience',
-];
-
-export const MATCHMAKING_PRIORITY_WEIGHT_SLOTS = [0.4, 0.3, 0.2, 0.1] as const;
-
 export const DEFAULT_MATCHMAKING_WEIGHTS: MatchmakingWeights = {
-  location: 0.4,
-  style: 0.3,
-  instrument: 0.2,
-  experience: 0.1,
+  availability: 0.19921875,
+  experience: 0.171875,
+  style: 0.171875,
+  location: 0.16796875,
+  collaborationGoals: 0.1640625,
+  instrument: 0.125,
 };

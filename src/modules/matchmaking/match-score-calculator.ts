@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import {
   DEFAULT_MATCHMAKING_WEIGHTS,
-  MATCHMAKING_PRIORITY_ORDER,
-  MATCHMAKING_PRIORITY_WEIGHT_SLOTS,
-  MatchmakingCriterion,
   MatchmakingWeights,
 } from './constants/matchmaking-weights.constant';
 import { MatchScoreBreakdownDto } from './dto/matchmaking-ranking-response.dto';
 import { MatchmakingProfile } from './interfaces/matchmaking-profile.interface';
 import { MatchmakingRankingFilters } from './interfaces/matchmaking-ranking-filters.interface';
+import { AvailabilityMatchStrategy } from './strategies/availability-match.strategy';
+import { CollaborationGoalsMatchStrategy } from './strategies/collaboration-goals-match.strategy';
 import { ExperienceMatchStrategy } from './strategies/experience-match.strategy';
 import { InstrumentMatchStrategy } from './strategies/instrument-match.strategy';
 import { LocationMatchStrategy } from './strategies/location-match.strategy';
@@ -28,16 +27,20 @@ export class MatchScoreCalculator {
   private readonly strategies: MatchmakingStrategy[];
 
   constructor(
+    availabilityStrategy: AvailabilityMatchStrategy,
+    collaborationGoalsStrategy: CollaborationGoalsMatchStrategy,
     instrumentStrategy: InstrumentMatchStrategy,
     styleStrategy: StyleMatchStrategy,
     locationStrategy: LocationMatchStrategy,
     experienceStrategy: ExperienceMatchStrategy,
   ) {
     this.strategies = [
-      locationStrategy,
-      styleStrategy,
-      instrumentStrategy,
+      availabilityStrategy,
       experienceStrategy,
+      styleStrategy,
+      locationStrategy,
+      collaborationGoalsStrategy,
+      instrumentStrategy,
     ];
   }
 
@@ -78,6 +81,8 @@ export class MatchScoreCalculator {
 
   private createEmptyBreakdown(): MatchScoreBreakdownDto {
     return {
+      availability: 0,
+      collaborationGoals: 0,
       location: 0,
       style: 0,
       instrument: 0,
@@ -86,47 +91,10 @@ export class MatchScoreCalculator {
   }
 
   private createWeights(filters: MatchmakingRankingFilters): MatchmakingWeights {
-    const promotedCriteria = MATCHMAKING_PRIORITY_ORDER.filter((criterion) =>
-      isCriterionFiltered(criterion, filters),
-    );
-    const remainingCriteria = MATCHMAKING_PRIORITY_ORDER.filter(
-      (criterion) => !promotedCriteria.includes(criterion),
-    );
-    const priorityOrder =
-      promotedCriteria.length > 0
-        ? [...promotedCriteria, ...remainingCriteria]
-        : MATCHMAKING_PRIORITY_ORDER;
-
-    const weights = { ...DEFAULT_MATCHMAKING_WEIGHTS };
-    priorityOrder.forEach((criterion, index) => {
-      const weight = MATCHMAKING_PRIORITY_WEIGHT_SLOTS[index];
-      if (weight !== undefined) {
-        weights[criterion] = weight;
-      }
-    });
-
-    return weights;
+    void filters;
+    return { ...DEFAULT_MATCHMAKING_WEIGHTS };
   }
 }
-
-const isCriterionFiltered = (
-  criterion: MatchmakingCriterion,
-  filters: MatchmakingRankingFilters,
-): boolean => {
-  switch (criterion) {
-    case 'location':
-      return filters.city !== undefined;
-    case 'style':
-      return filters.style !== undefined;
-    case 'instrument':
-      return filters.instrument !== undefined;
-    case 'experience':
-      return (
-        filters.experienceMin !== undefined ||
-        filters.experienceMax !== undefined
-      );
-  }
-};
 
 const clamp01 = (value: number): number => {
   if (Number.isNaN(value) || !Number.isFinite(value)) {

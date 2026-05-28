@@ -1,8 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { Instrument, Profile, Style } from '@prisma/client';
+import {
+  AvailabilityPeriod,
+  AvailabilityTime,
+  CollaborationGoal,
+  Instrument,
+  Profile,
+  Style,
+} from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 
 type ProfileWithRelations = Profile & {
+  collaborationGoals: CollaborationGoal[];
+  availabilityPeriods: AvailabilityPeriod[];
+  availabilityTimes: AvailabilityTime[];
   instruments: Instrument[];
   styles: Style[];
 };

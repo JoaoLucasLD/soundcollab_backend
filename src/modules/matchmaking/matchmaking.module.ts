@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { AvailabilityMatchStrategy } from './strategies/availability-match.strategy';
+import { CollaborationGoalsMatchStrategy } from './strategies/collaboration-goals-match.strategy';
 import { ExperienceMatchStrategy } from './strategies/experience-match.strategy';
 import { MatchScoreCalculator } from './match-score-calculator';
 import { MatchmakingController } from './matchmaking.controller';
@@ -16,6 +18,8 @@ import { StyleMatchStrategy } from './strategies/style-match.strategy';
     MatchmakingService,
     MatchmakingRepository,
     MatchScoreCalculator,
+    AvailabilityMatchStrategy,
+    CollaborationGoalsMatchStrategy,
     InstrumentMatchStrategy,
     StyleMatchStrategy,
     LocationMatchStrategy,

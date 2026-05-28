@@ -1,3 +1,9 @@
+import {
+  AvailabilityPeriod,
+  AvailabilityTime,
+  CollaborationGoal,
+} from '@prisma/client';
+
 export interface MatchmakingProfile {
   id: string;
   userId: string;
@@ -7,6 +13,9 @@ export interface MatchmakingProfile {
   longitude?: number | null;
   experience: number | null;
   preferences: string | null;
+  collaborationGoals: CollaborationGoal[];
+  availabilityPeriods: AvailabilityPeriod[];
+  availabilityTimes: AvailabilityTime[];
   instruments: string[];
   styles: string[];
 }
