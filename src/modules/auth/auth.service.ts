@@ -42,7 +42,7 @@ export class AuthService {
       'soundcollab-web',
     );
     this.jwtExpiresInSeconds = Number(
-      this.configService.get<string>('JWT_EXPIRES_IN_SECONDS', '900'),
+      this.configService.get<string>('JWT_EXPIRES_IN_SECONDS', '1200'),
     );
     this.maxFailedLoginAttempts = Number(
       this.configService.get<string>('AUTH_MAX_FAILED_LOGIN_ATTEMPTS', '5'),

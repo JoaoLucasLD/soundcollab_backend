@@ -26,7 +26,7 @@ let AuthService = class AuthService {
         this.jwtSecret = this.configService.get('JWT_SECRET', 'dev-secret-change-me');
         this.jwtIssuer = this.configService.get('JWT_ISSUER', 'soundcollab');
         this.jwtAudience = this.configService.get('JWT_AUDIENCE', 'soundcollab-web');
-        this.jwtExpiresInSeconds = Number(this.configService.get('JWT_EXPIRES_IN_SECONDS', '900'));
+        this.jwtExpiresInSeconds = Number(this.configService.get('JWT_EXPIRES_IN_SECONDS', '1200'));
         this.maxFailedLoginAttempts = Number(this.configService.get('AUTH_MAX_FAILED_LOGIN_ATTEMPTS', '5'));
         this.lockMinutes = Number(this.configService.get('AUTH_LOCK_MINUTES', '15'));
     }
