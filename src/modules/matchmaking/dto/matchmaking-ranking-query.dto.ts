@@ -32,6 +32,6 @@ export class MatchmakingRankingQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(200)
+  @Max(900)
   radiusKm?: number;
 }
