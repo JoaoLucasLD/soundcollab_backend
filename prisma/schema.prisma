@@ -138,6 +138,7 @@ enum CollaborationGoal {
   PRODUCTION
   STUDY
   CASUAL_JAM
+  NETWORKING
 }
 
 enum Gender {
