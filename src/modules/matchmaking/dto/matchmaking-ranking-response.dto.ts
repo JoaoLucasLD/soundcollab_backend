@@ -21,6 +21,7 @@ export class MatchmakingRankingItemDto {
   city!: string | null;
   gender!: Gender | null;
   age!: number | null;
+  distanceKm!: number | null;
   experience!: number | null;
   bio!: string | null;
   preferences!: string | null;

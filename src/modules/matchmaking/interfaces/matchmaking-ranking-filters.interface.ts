@@ -4,4 +4,5 @@ export interface MatchmakingRankingFilters {
   instrument?: string;
   experienceMin?: number;
   experienceMax?: number;
+  radiusKm?: number;
 }

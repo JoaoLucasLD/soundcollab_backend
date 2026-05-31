@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import {
+  calculateDistanceKm,
+  Coordinates,
+  getCoordinates,
+} from '../matchmaking-geo.util';
+import {
   MatchmakingStrategy,
   MatchmakingStrategyInput,
 } from './matchmaking-strategy.interface';
@@ -26,29 +31,6 @@ export class LocationMatchStrategy implements MatchmakingStrategy {
   }
 }
 
-type Coordinates = {
-  latitude: number;
-  longitude: number;
-};
-
-const getCoordinates = (profile: {
-  latitude?: number | null;
-  longitude?: number | null;
-}): Coordinates | null => {
-  if (
-    profile.latitude === undefined ||
-    profile.latitude === null ||
-    profile.longitude === undefined ||
-    profile.longitude === null
-  ) {
-    return null;
-  }
-
-  return {
-    latitude: profile.latitude,
-    longitude: profile.longitude,
-  };
-};
 
 const calculateCityCompatibility = (
   leftValue: string | null,
@@ -77,7 +59,7 @@ const calculateDistanceProximityScore = (
   origin: Coordinates,
   destination: Coordinates,
 ): number => {
-  const distanceKm = haversineKm(origin, destination);
+  const distanceKm = calculateDistanceKm(origin, destination);
 
   if (distanceKm <= 5) {
     return 1;
@@ -95,21 +77,3 @@ const calculateDistanceProximityScore = (
   return 0.1;
 };
 
-const haversineKm = (origin: Coordinates, destination: Coordinates): number => {
-  const earthRadiusKm = 6371;
-  const latitudeDelta = toRadians(destination.latitude - origin.latitude);
-  const longitudeDelta = toRadians(destination.longitude - origin.longitude);
-  const originLatitude = toRadians(origin.latitude);
-  const destinationLatitude = toRadians(destination.latitude);
-
-  const a =
-    Math.sin(latitudeDelta / 2) ** 2 +
-    Math.cos(originLatitude) *
-      Math.cos(destinationLatitude) *
-      Math.sin(longitudeDelta / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  return earthRadiusKm * c;
-};
-
-const toRadians = (value: number): number => (value * Math.PI) / 180;

@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 
 export class MatchmakingRankingQueryDto {
   @IsOptional()
@@ -28,4 +28,10 @@ export class MatchmakingRankingQueryDto {
   @IsInt()
   @Min(0)
   experienceMax?: number;
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(200)
+  radiusKm?: number;
 }

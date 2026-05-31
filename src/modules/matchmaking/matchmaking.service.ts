@@ -10,6 +10,7 @@ import {
   decryptBirthDate,
 } from '../profiles/profile-birth-date.crypto';
 import { MatchmakingRankingQueryDto } from './dto/matchmaking-ranking-query.dto';
+import { calculateDistanceKm, getCoordinates } from './matchmaking-geo.util';
 import {
   MatchmakingRankingItemDto,
   MatchmakingRankingResponseDto,
@@ -37,12 +38,36 @@ export class MatchmakingService {
 
     const requester = this.toMatchmakingProfile(requesterProfile);
     const filters = this.normalizeFilters(query);
+    const requesterCoordinates = getCoordinates(requester);
+    if (filters.radiusKm !== undefined && !requesterCoordinates) {
+      throw new BadRequestException(
+        'Profile location is required to filter by distance',
+      );
+    }
+
     const candidateProfiles =
       await this.matchmakingRepository.findCandidates(userId);
 
     const ranking = candidateProfiles
+      .filter((profile) => {
+        if (filters.radiusKm === undefined || !requesterCoordinates) {
+          return true;
+        }
+
+        const candidateCoordinates = getCoordinates(profile);
+        return (
+          candidateCoordinates !== null &&
+          calculateDistanceKm(requesterCoordinates, candidateCoordinates) <=
+            filters.radiusKm
+        );
+      })
       .map<MatchmakingRankingItemDto>((profile) => {
         const candidate = this.toMatchmakingProfile(profile);
+        const candidateCoordinates = getCoordinates(candidate);
+        const distanceKm =
+          requesterCoordinates && candidateCoordinates
+            ? calculateDistanceKm(requesterCoordinates, candidateCoordinates)
+            : null;
         const score = this.matchScoreCalculator.calculate(
           requester,
           candidate,
@@ -56,6 +81,7 @@ export class MatchmakingService {
           city: candidate.city,
           gender: profile.gender,
           age: calculateAge(decryptBirthDate(profile.birthDateEncrypted)),
+          distanceKm: distanceKm === null ? null : Math.round(distanceKm),
           experience: candidate.experience,
           bio: profile.bio,
           preferences: candidate.preferences,
@@ -90,6 +116,7 @@ export class MatchmakingService {
     const instrument = this.normalizeOptionalText(query.instrument)?.toLowerCase();
     const experienceMin = query.experienceMin;
     const experienceMax = query.experienceMax;
+    const radiusKm = query.radiusKm;
 
     if (
       experienceMin !== undefined &&
@@ -107,6 +134,7 @@ export class MatchmakingService {
       instrument,
       experienceMin,
       experienceMax,
+      radiusKm,
     };
   }
 
