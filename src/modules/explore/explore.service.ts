@@ -199,7 +199,7 @@ function calculateDistanceKm(origin: GeoPoint, destination: {
     return null;
   }
 
-  const earthRadiusKm = 6378;
+  const earthRadiusKm = 6371;
   const latitudeDelta = toRadians(destination.latitude - origin.latitude);
   const longitudeDelta = toRadians(destination.longitude - origin.longitude);
   const originLatitude = toRadians(origin.latitude);
